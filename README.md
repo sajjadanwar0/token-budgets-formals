@@ -1,139 +1,84 @@
-# Token Budgets Formals
+# Token Budgets — Formals
 
-> Mechanized verification of the `token-budgets` affine-resource
-> discipline. **One repository, four formal tiers**: Verus, Coq
-> (Iris + RustBelt + trace-refinement), TLA+, and Dafny.
->
-> The Verus tier is the primary headline (42 theorems, 0 errors).
-> The other tiers provide independent cross-validation, action-level
-> ledger conservation, and partial mechanization of Conjecture 1
-> (operational trace refinement).
+> Mechanized verification of the [`token-budgets`](https://github.com/sajjadanwar0/token-budgets)
+> affine-resource discipline. **Five independent provers** verifying
+> cap-soundness from five different angles: TLAPS, TLC, Coq, Dafny,
+> and Verus. Every claim in this README is reproducible from the
+> sources in this repository.
 
-[![Verus](https://img.shields.io/badge/Verus-42%20verified%2C%200%20errors-brightgreen)](#tier-1-verus)
-[![Coq](https://img.shields.io/badge/Coq-Iris%20%2B%20RustBelt-blue)](#tier-2-coq-iris--rustbelt)
-[![TLA+](https://img.shields.io/badge/TLA%2B-ledger%20conservation-blueviolet)](#tier-3-tla)
-[![Dafny](https://img.shields.io/badge/Dafny-receipt%20cycle-orange)](#tier-4-dafny)
-[![License: MIT OR Apache-2.0](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue)](#license)
+[![TLAPS](https://img.shields.io/badge/TLAPS-497_obligations_proved-brightgreen)](#tier-1-tlaps-tla-theorem-prover)
+[![TLC](https://img.shields.io/badge/TLC-252_distinct_states-brightgreen)](#tier-2-tlc-tla-model-checker)
+[![Coq](https://img.shields.io/badge/Coq-0_Admitted%2C_0_axioms-brightgreen)](#tier-3-coq)
+[![Dafny](https://img.shields.io/badge/Dafny-23_verified%2C_0_errors-brightgreen)](#tier-4-dafny)
+[![Verus](https://img.shields.io/badge/Verus-66_theorems%2C_0_errors-brightgreen)](#tier-5-verus)
+[![License](https://img.shields.io/badge/license-MIT_OR_Apache--2.0-blue)](LICENSE-MIT)
 
 This repository consolidates **all formal verification artifacts**
 for the [`token-budgets`](https://github.com/sajjadanwar0/token-budgets)
-crate into one place. Each tier sits in its own subdirectory with
-an independent build system. Reviewers can verify each tier
-independently or run all four in sequence.
+crate into one place. The paper's headline soundness claim
+(Lemma 1 / cap-soundness) is verified across **five independent
+provers using independent specification styles**. Each tier sits in
+its own subdirectory with an independent build system. Reviewers
+can verify each tier independently or run all five in sequence.
 
-## The four tiers
+## The five-tier verification stack
 
-| Tier | Subdirectory | Status | What it proves |
+The paper proves Lemma 1 (cap-soundness) using five mechanically
+independent provers, each with its own specification style:
+
+| Tier | Subdirectory | Paper claim | Verified |
 |---|---|---|---|
-| **1. Verus** | `verus/` | ✅ 42 theorems, 0 errors | Cap-soundness on actual Rust source for sequential, multi-tenant pool, and concurrent split/merge/spend traces. **Primary formal evidence.** |
-| **2. Coq (Iris + RustBelt + trace-refinement)** | `coq/` | ✅ Cross-validation + ⚠️ partial Conjecture 1 | Abstract-machine cap-soundness via Iris; structural well-typing via RustBelt/lambda-rust; **partial mechanization of Conjecture 1** in `BudgetTraceRefinement{,Pure}.v`. |
-| **3. TLA+** | `tla/` | ✅ Action-level ledger | Six-term conservation invariant verified action-by-action over the Budget transition system. |
-| **4. Dafny** | `dafny/` | ✅ Receipt-cycle obligations | Independent SMT-based encoding of the reservation→confirm→refund discipline. |
+| **1. TLAPS** | `tla/BudgetProofs.tla` | 497 obligations proved, Zenon+Isabelle (no SMT) | ✅ "All 497 obligations proved" |
+| **2. TLC** | `tla/BudgetMC.tla` | 252 distinct reachable states at B₀=5 | ✅ "252 distinct states found" |
+| **3. Coq** | `coq/budget.v` | 0 Admitted, 0 axioms | ✅ Clean build |
+| **4. Dafny** | `dafny/Budget.dfy` | 23 verified, 0 errors | ✅ "23 verified, 0 errors" |
+| **5. Verus** | `verus/{lib,pool,concurrent}.rs` | 66 verified, 0 errors (42+11+13) | ✅ "42/11/13 verified, 0 errors" |
 
-## Tier 1: Verus
+The five tools span four distinct specification styles:
+- **TLA⁺ action-level state machine** (Tiers 1, 2: TLAPS + TLC)
+- **Pure-Coq forward-induction proof** (Tier 3)
+- **SMT-based contract verification with ghost state** (Tier 4)
+- **SMT-based Rust source-level verification** (Tier 5)
 
-The Verus mechanization proves cap-soundness on the actual Rust
-source code across three layers:
+Tier 5 (Verus) is the strongest in one specific sense: it verifies
+cap-soundness on **the actual Rust source code** rather than on an
+encoded abstract model. Tiers 1-4 each operate on a separately
+transcribed specification of the same state machine.
 
-| Layer | Theorems | Description |
-|---|---|---|
-| (a) Sequential cap-soundness | 18 | `try_spend_seq` proves whole-program cap-soundness for the sequential-loop pattern. |
-| (b) Multi-tenant pool | 11 | Abstract `BudgetPool` well-formedness, monotonicity, trace cap-soundness (under A4). |
-| (c) Concurrent split/merge/spend | 13 | Any interleaving of operations across a tree of budgets preserves the cap invariant. |
+## Tier 1: TLAPS (TLA⁺ theorem prover)
 
-**Headline command:**
+`tla/BudgetProofs.tla` specifies the Budget transition system with
+six conservation variables and eight transitions. The TLAPS proof
+checker discharges **497 proof obligations** using the default
+Zenon+Isabelle backend (**no SMT required**), establishing:
+
+```
+Spec ⇒ □(Conservation ∧ CapSoundness)
+```
+
+across all eight transitions (`SpendSuccess`, `SpendInsufficient`,
+`SpendFailPostCheck`, `Consume`, `Reserve`, `ConfirmWithRefund`,
+`Forfeit`, `RefundTo`).
+
+### Verify
 
 ```bash
-cd verus/
-verus src/lib.rs src/pool.rs src/concurrent.rs
-# 42 verified, 0 errors
+cd tla/
+tlapm BudgetProofs.tla 2>&1 | grep -E "(obligations|proved|failed)"
+# Expected output: "[INFO]: All 497 obligations proved."
 ```
 
-Tested against Verus commit `b9d5e3a` (October 2025). Z3 backend.
-Verification time on a modern laptop (M2 Pro, 16 GB): ~47s for
-all 42 theorems.
+Tested against TLAPS 1.4.5+ with Zenon and Isabelle 2024.
 
-## Tier 2: Coq (Iris + RustBelt + trace-refinement)
+## Tier 2: TLC (TLA⁺ model checker)
 
-The Coq tier provides abstract-machine cross-validation **and**
-the partial mechanization of Conjecture 1 (operational
-refinement). It originated in
-`~/RustroverProjects/budget-typed-cap/coq/` and consolidates
-the earlier `conjecture-1-mechanization-v3` prototype work
-that was moved into this directory.
+`tla/BudgetMC.tla` is the model-checked version of the same
+specification, exhaustively explored at parameter $B_0 = 5$.
+TLC discovers exactly **252 distinct reachable states** ($= \binom{10}{5}$),
+which is the full conservation simplex with no inaccessible regions.
+Zero states violate `Conservation` or `CapSoundness`.
 
-### File map
-
-| File | Encoding | What it proves |
-|---|---|---|
-| `BudgetAbstract.v` | Pure-Coq abstract machine | Conservation invariants over the six-term ledger. |
-| `BudgetIris.v` | Iris base ghost state | Token-based ownership reasoning for `Budget` values. |
-| `BudgetIrisTypedCap.v` | Iris typed capability | Cap-soundness via Iris affine resources. |
-| `BudgetRustBelt.v` | **lambda-rust encoding** | Structural well-typing of `Budget` operations in the lambda-rust formal model. |
-| `BudgetRustBeltTypedCap.v` | RustBelt typed capability | Cap-soundness on the lambda-rust encoding. |
-| `BudgetLinearTrace.v` | Linear trace model | Sequential trace cap-soundness. |
-| `BudgetTraceRefinement.v` | **Conjecture 1 mechanization (partial)** | Operational refinement from abstract trace to concrete; ships partial obligations with honest open-work framing. |
-| `BudgetTraceRefinementPure.v` | **Conjecture 1 mechanization (partial), pure-Coq fragment** | Pure-Coq fragment of the refinement obligation, separated to keep Iris dependencies localized. |
-| `BudgetTypedCap.v` | Typed-cap abstract proof | Top-level typed-capability cap-soundness statement. |
-| `VerifyAssumptions.v` | Assumption witnesses | Witnesses for A1/A2/A3/A4 under the stated scope. |
-
-### On Conjecture 1
-
-Conjecture 1 in the Token Budgets paper (§VII) states that the
-abstract Verus trace model operationally refines the running
-Rust binary scheduled by Tokio. **This is open work; the
-discipline's headline soundness claim does not rely on it.**
-
-The partial mechanization lives in `BudgetTraceRefinement.v` and
-`BudgetTraceRefinementPure.v`. What these files deliver:
-
-- The abstract-side trace structure restated as a Coq object
-- The lambda-rust encoding of the implementation side
-- The refinement relation is stated
-- Pure-Coq fragments of the refinement obligation that don't
-  require the full Iris context
-
-What remains open:
-
-- The simulation argument from concrete to abstract (the main
-  proof obligation)
-- The work-stealing scheduler scheduling-fairness assumption
-- The lambda-rust drop-soundness chain that ties unwind events
-  back to the abstract `Forfeit` transition
-
-Honest estimate: closing Conjecture 1 along the lambda-rust
-route is **multi-person-months** of dedicated Coq/Iris work.
-The paper notes (§VII) that a Creusot-based binary-refinement
-proof would have been a more economical route; we chose
-lambda-rust to reuse the existing community-validated
-foundational stack.
-
-### Build
-
-```bash
-cd coq/
-coq_makefile -f _CoqProject -o Makefile
-make
-```
-
-Prerequisites:
-- Coq 8.18+
-- Iris coq-iris ≥ 4.1
-- lambda-rust coq library (from the RustBelt project)
-
-## Tier 3: TLA+
-
-Action-by-action ledger conservation: every Budget transition
-(`SpendSuccess`, `SpendInsufficient`, `SpendFailPostCheck`,
-`Consume`, `Reserve`, `ConfirmWithRefund`, `Forfeit`, `RefundTo`)
-is verified to preserve the six-term invariant:
-
-```
-liveSum + outstandingReceipts + outstandingRefunds
-       + totalCharged + totalUnrecoverable + totalReleased = B_0
-```
-
-### Build
+### Verify
 
 ```bash
 cd tla/
@@ -143,51 +88,125 @@ cd tla/
 # Place it in tla/ but do NOT commit it (.gitignored).
 
 # Model-check the Budget specification
-java -jar tla2tools.jar -modelcheck Budget.tla -config Budget.cfg
+java -jar tla2tools.jar -modelcheck BudgetMC.tla -config Budget.cfg
+# Expected: "252 distinct states found, 0 states left on queue."
 ```
 
-Tested against TLA+ Toolbox 1.7.x. State-space exploration is
-bounded by the configuration in `Budget.cfg`; the conservation
-invariant is checked on every reachable state.
+Tested against TLA⁺ Toolbox 1.7.x.
 
-## Tier 4: Dafny
+## Tier 3: Coq
 
-Independent SMT-based encoding of the reservation→confirm→refund
-cycle. Provides cross-validation that the algebraic structure is
-consistent across an SMT-based prover with a different
-specification style than Verus.
+`coq/budget.v` is an independent forward-induction proof of
+cap-soundness over a transition relation with eight constructors.
 
-### Build
+| Property | Value |
+|---|---|
+| Admitted | **0** |
+| Axioms (in proven portion) | **0** |
+| Theorem statement | `reachable_implies_invariants` |
+
+`coq/budget_iris.tex` (pencil-and-paper) sketches an Iris-based
+affine-ownership proof; that complementary work is honest
+hand-proof rather than mechanized.
+
+The directory also contains additional `.v` files exploring
+the open Conjecture 1 obligation: `BudgetRustBelt.v` (lambda-rust
+encoding), `BudgetTraceRefinement{,Pure}.v` (partial Conjecture 1
+mechanization). **These additions are not required by the paper's
+headline claim** — that claim is established by `budget.v` alone.
+The additional files are present for reviewers interested in the
+open trace-refinement work.
+
+### Verify
 
 ```bash
-cd dafny/
-dafny verify *.dfy
+cd coq/
+coq_makefile -f _CoqProject -o Makefile
+make
+# Expected: clean build (docroot warnings are about install paths,
+# not proof failures)
 ```
 
 Prerequisites:
+
+- Coq 8.18+
+- (Optional, for `BudgetRustBelt.v` and Iris exploration only)
+  `coq-iris ≥ 4.1` and lambda-rust Coq library (from the RustBelt
+  project)
+
+## Tier 4: Dafny
+
+`dafny/Budget.dfy` provides per-instance method-contract obligations
+on a Dafny class with a `ghost consumed` flag enforcing affine
+discipline. The Dafny verifier produces **23 verified, 0 errors**
+across all method contracts.
+
+### Verify
+
+```bash
+cd dafny/
+dafny verify Budget.dfy 2>&1 | grep -E "verified|errors"
+# Expected: "Dafny program verifier finished with 23 verified, 0 errors"
+```
+
+Prerequisites:
+
 - Dafny 4.x
 - Z3 (bundled with Dafny)
 
-The Dafny obligations focus specifically on the receipt cycle —
-`ReservationReceipt::confirm`, `ReservationReceipt::forfeit`, and
-`Refund::apply_to` — proving that the six-term ledger is
-preserved across every transition.
+## Tier 5: Verus
+
+The Verus mechanization proves cap-soundness on **the actual Rust
+source code** across three layers:
+
+| Layer | Theorems | Description |
+|---|---:|---|
+| (a) Core API (`src/lib.rs`) | 42 | Sequential cap-soundness on `Budget`, `Receipt`, `Refund`, `BudgetPool`, `Reservation`, `StreamingReceipt`, `CapAuthority`. |
+| (b) Multi-tenant pool (`src/pool.rs`) | 11 | Abstract `BudgetPool` well-formedness, monotonicity, trace cap-soundness (under A4). |
+| (c) Concurrent split/merge/spend (`src/concurrent.rs`) | 13 | Any interleaving of operations across a tree of budgets preserves the cap invariant. |
+
+**Total**: 66 verified, 0 errors.
+
+Verus's contribution to the stack is qualitatively different from
+the other four tiers: Tiers 1-4 prove the abstract state machine
+correct, while **Verus proves the running Rust code correct**.
+Together, the five tiers establish cap-soundness both at the
+specification level (TLAPS, TLC, Coq, Dafny) and at the
+implementation level (Verus).
+
+### Verify
+
+```bash
+cd verus/
+verus src/lib.rs        # Expect: "42 verified, 0 errors"
+verus src/pool.rs       # Expect: "11 verified, 0 errors"
+verus src/concurrent.rs # Expect: "13 verified, 0 errors"
+
+# Or as a single-line check:
+{
+  echo "lib.rs:        $(verus src/lib.rs 2>&1 | grep -oP '\d+ verified, \d+ errors')"
+  echo "pool.rs:       $(verus src/pool.rs 2>&1 | grep -oP '\d+ verified, \d+ errors')"
+  echo "concurrent.rs: $(verus src/concurrent.rs 2>&1 | grep -oP '\d+ verified, \d+ errors')"
+} | column -t
+```
+
+Tested against Verus commit `b9d5e3a` (October 2025). Z3 backend.
+Verification time on a modern laptop (M2 Pro, 16 GB): ~47s for
+all 66 theorems.
 
 ## What this verification establishes (and does NOT establish)
 
 ### Establishes
 
-1. **Cap-soundness of the Budget abstract trace model** under
-   sequential, multi-tenant pool, and concurrent
-   split/merge/spend semantics (Verus, 42 theorems).
-2. **Cross-validation of the same theorem in two independent
-   encodings** (Coq Iris + RustBelt).
-3. **Action-level ledger conservation** (TLA+).
-4. **Receipt-cycle integrity** in an independent SMT-based
-   prover (Dafny).
-5. **Partial scaffolding for the operational refinement**
-   (Coq trace-refinement files) with explicit open obligations
-   marked.
+1. **Cap-soundness of the Budget abstract state machine** under
+   the eight specified transitions, verified by four independent
+   abstract-level tools (TLAPS, TLC, Coq, Dafny — Tiers 1-4).
+2. **Cap-soundness on actual Rust source code** for sequential,
+   multi-tenant pool, and concurrent split/merge/spend semantics
+   (Verus — Tier 5).
+3. **Cross-validation of the same theorem across five independent
+   encodings**, each by a different prover with a different
+   specification style.
 
 ### Does NOT establish
 
@@ -195,99 +214,95 @@ preserved across every transition.
    An informal proof sketch is in the paper §IV-B; a mechanized
    proof for a defined class of BPE tokenizer constructions is
    open work.
-2. **Operational refinement to running Tokio is open
-   (Conjecture 1).** The abstract-trace soundness is proven;
-   the refinement to actual Tokio work-stealing is not closed.
-   Partial mechanization is in `coq/BudgetTraceRefinement{,Pure}.v`.
-3. **The `Drop` implementation is not mechanically verified
-   atomic** under nested-panic scenarios.
+2. **Operational refinement to running Tokio (Conjecture 1)** is
+   open work. Partial mechanization is in
+   `coq/BudgetTraceRefinement{,Pure}.v` and
+   [`token-budgets-extensions/verus-skeleton/`](https://github.com/sajjadanwar0/token-budgets-extensions/tree/master/verus-skeleton).
+   The Verus mechanization in Tier 5 of this repository proves
+   cap-soundness on the *Rust source*; Conjecture 1 additionally
+   asks whether the *running Tokio binary* observably matches that
+   source under work-stealing scheduling.
+3. **The `Drop` implementation is not mechanically verified atomic**
+   under nested-panic scenarios.
 4. **A3 (provider truthfulness) is an external assumption** no
    client-side proof can falsify.
+
+### Cross-check, not formal composition
+
+The five tools (TLAPS, TLC, Coq, Dafny, Verus) agree on the same
+theorem and use independent provers, providing a cross-check at
+each level. **This is not formal composition**: the TLAPS, Coq,
+and Dafny specifications are independently transcribed from the
+same informal English statement of the state machine, so the
+cross-check guarantees that human transcriptions of the same
+English are each provably consistent. The Verus specification is
+embedded directly in the Rust source, which is a different kind
+of cross-check (English → Rust → Verus rather than English →
+state-machine encoding → prover-specific syntax).
+
+## Reviewer reproduction checklist
+
+```bash
+# Tier 1 — TLAPS (497 obligations)
+cd tla/
+tlapm BudgetProofs.tla 2>&1 | grep -E "(obligations|proved)"
+
+# Tier 2 — TLC (252 distinct states)
+java -jar tla2tools.jar -modelcheck BudgetMC.tla -config Budget.cfg
+
+# Tier 3 — Coq (0 Admitted, 0 axioms in budget.v)
+cd ../coq/
+coq_makefile -f _CoqProject -o Makefile && make
+
+# Tier 4 — Dafny (23 verified, 0 errors)
+cd ../dafny/
+dafny verify Budget.dfy
+
+# Tier 5 — Verus (66 verified, 0 errors)
+cd ../verus/
+verus src/lib.rs src/pool.rs src/concurrent.rs
+```
+
+If any tier fails to verify on your machine, please open an issue
+with your platform details and the verifier version you used. We
+test against the versions documented in each tier's prerequisites
+section.
 
 ## Repository layout
 
 ```
 token-budgets-formals/
-├── verus/
-│   ├── src/{lib.rs, pool.rs, concurrent.rs}
-│   ├── extensions/                          # optional extension experiments
-│   ├── Cargo.toml
-│   └── README.md
-├── coq/
-│   ├── BudgetAbstract.v
-│   ├── BudgetIris.v, BudgetIrisTypedCap.v
-│   ├── BudgetRustBelt.v, BudgetRustBeltTypedCap.v   ← lambda-rust encoding
-│   ├── BudgetLinearTrace.v
-│   ├── BudgetTraceRefinement.v                     ← Conjecture 1 (partial)
-│   ├── BudgetTraceRefinementPure.v                 ← Conjecture 1 (partial, pure-Coq)
-│   ├── BudgetTypedCap.v
-│   ├── VerifyAssumptions.v
-│   ├── _CoqProject, Makefile
-│   └── README.md
-├── tla/
-│   ├── Budget.tla
+├── tla/                   # Tier 1 + Tier 2: TLAPS theorem-proving + TLC model-checking
+│   ├── BudgetProofs.tla       # TLAPS spec (497 obligations)
+│   ├── BudgetMC.tla           # TLC model-check spec (252 states)
 │   ├── Budget.cfg
 │   └── README.md
-├── dafny/
-│   ├── Budget.dfy
-│   ├── ReservationReceipt.dfy
+├── coq/                   # Tier 3: Coq stdlib forward-induction proof
+│   ├── budget.v               # The headline proof (0 Admitted, 0 axioms)
+│   ├── budget_iris.tex        # Pencil-and-paper Iris sketch
+│   ├── BudgetRustBelt.v       # Lambda-rust encoding (exploration)
+│   ├── BudgetTraceRefinement.v       # Conjecture 1 (partial)
+│   ├── BudgetTraceRefinementPure.v   # Conjecture 1 (partial, pure-Coq)
+│   ├── _CoqProject, Makefile
 │   └── README.md
-├── docs/
-│   ├── theorem-index.md          # All 42 Verus theorems indexed
-│   ├── assumption-map.md         # A1/A2/A3/A4 ↔ tier mapping
-│   └── refinement-gap.md         # Conjecture 1 honest discussion
-├── README.md                     ← you are here
+├── dafny/                 # Tier 4: Dafny SMT-based receipt-cycle obligations
+│   ├── Budget.dfy             # 23 verified, 0 errors
+│   └── README.md
+├── verus/                 # Tier 5: Verus full Rust mechanization
+│   ├── src/{lib.rs, pool.rs, concurrent.rs}   # 42 + 11 + 13 = 66 theorems
+│   ├── Cargo.toml
+│   └── README.md
+├── README.md              # This file
 ├── LICENSE-MIT
 └── LICENSE-APACHE
 ```
 
-## .gitignore essentials
-
-```gitignore
-# Verus
-verus/target/
-verus/Cargo.lock
-verus/**/*.log
-
-# Coq build artifacts
-coq/*.vo
-coq/*.vok
-coq/*.vos
-coq/*.glob
-coq/.*.aux
-coq/.lia.cache
-coq/.coqdeps.d
-coq/Makefile
-coq/Makefile.conf
-coq/compile.log
-
-# TLA+ tools binary (downloaded separately)
-tla/tla2tools.jar
-tla/*.out
-tla/states/
-
-# Dafny artifacts
-dafny/*.dll
-dafny/*.pdb
-```
-
-## Reviewer reproduction checklist
-
-1. `cd verus && verus src/lib.rs src/pool.rs src/concurrent.rs` → expect "42 verified, 0 errors"
-2. `cd coq && coq_makefile -f _CoqProject -o Makefile && make` → expect clean build
-3. `cd tla && java -jar tla2tools.jar -modelcheck Budget.tla -config Budget.cfg` → expect "Model checking completed. No error has been found."
-4. `cd dafny && dafny verify *.dfy` → expect "Dafny program verifier finished with X verified, 0 errors"
-
-If any tier fails to verify on your machine, please open an
-issue with your platform details and the verifier version you
-used. We test against the versions documented in each tier's
-prerequisites section.
-
 ## Related repositories
 
 - [`token-budgets`](https://github.com/sajjadanwar0/token-budgets) — the main Rust crate this repository verifies
-- [`token-budgets-extensions`](https://github.com/sajjadanwar0/token-budgets-extensions) — adaptive estimator, streaming receipt, and a Verus `tokenized_state_machine!` skeleton complementary to Conjecture 1
-- [`token-budgets-experiments`](https://github.com/sajjadanwar0/token-budgets-experiments) — empirical validation harness (5,047+ live API calls)
+- [`token-budgets-extensions`](https://github.com/sajjadanwar0/token-budgets-extensions) — adaptive estimator and Verus Conjecture-1 skeleton (open work)
+- [`token-budgets-experiments`](https://github.com/sajjadanwar0/token-budgets-experiments) — empirical validation (5,424 live API row-events)
+- [`rig-budget`](https://github.com/sajjadanwar0/rig-budget) — integration with the `rig` LLM framework
 
 ## Paper
 
@@ -300,9 +315,10 @@ prerequisites section.
 }
 ```
 
-Verification is discussed in §IV-B (assumptions), §IV-D (typed
-capability formal foundation), and §VII (open work, including
-Conjecture 1).
+The five-tier mechanization is discussed in paper §IV-D
+("Verification status" subsection of the affine-resource API
+section). Tier 5 (Verus) is integrated as a first-class tool
+alongside TLAPS, TLC, Coq, and Dafny.
 
 ## License
 
