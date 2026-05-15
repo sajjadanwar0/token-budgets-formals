@@ -1,0 +1,6 @@
+# Add these lines to your lambda-rust _CoqProject if budget.v doesn't
+# pick them up automatically (the symlink should be enough on most
+# setups, but some opam/Coq combinations need explicit registration):
+
+theories/typing/lib/day1_exercises.v
+theories/typing/lib/budget.v

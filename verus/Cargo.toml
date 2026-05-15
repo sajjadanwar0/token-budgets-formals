@@ -1,0 +1,23 @@
+[package]
+name = "budget-verus"
+version = "0.1.0"
+edition = "2021"
+description = "Verus source-level verification of the Token Budgets discipline. Sequel-paper scaffolding: closes the source-to-spec refinement gap that the main paper identifies as the principal open obligation."
+license = "Apache-2.0 OR MIT"
+
+[workspace]
+
+# Verus is consumed as a procedural-macro toolchain; this dependency
+# pulls in the Verus prelude and SMT-backed proof checker. The version
+# is pinned to the one used in this artifact; newer Verus may require
+# minor adjustments to the spec syntax.
+#
+# Install Verus: see https://github.com/verus-lang/verus/blob/main/INSTALL.md
+# Run verification: `cargo verus verify` (or `verus src/lib.rs` directly)
+
+# [dependencies]
+# vstd = { path = "../verus/source/vstd" }  # uncomment after installing Verus
+
+[lib]
+name = "budget_verus"
+path = "src/lib.rs"
