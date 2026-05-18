@@ -197,7 +197,8 @@ verus! {
                 {
                     let sum_val: u64 = (s.live[i as int] + s.live[j as int]) as u64;
                     MultiState {
-                        live: s.live.update(i as int, sum_val).remove(j as int),
+                        live: s.live.update(i as int, sum_val as u64).remove(j as int)
+,
                         initial_total: s.initial_total,
                     }
                 } else { s }
