@@ -1,0 +1,31 @@
+issue_id,framework,date,short_url,title,notes_redacted,rater_b_tag
+LANG-027,langchain,2025-03,#30362,max_retries Parameter in ChatMistralAI Class Is Ineffective Due to Commented Code,,bf
+LANG-010,langchain,2024-02,#18212,get_openai_callback returns 0 for create_openai_functions_agent,,bf
+LANG-002,langchain,2024-01,#16251,load_summarize_chain hits infinite loop due to small token_max,,bf
+GPTE-002,gpt-engineer,2023-06,#114,"Specifications repeating, consuming many tokens",,bf
+CCDE-001,claude-code,2025-10,#9579,Autocompacting Loop Causing Massive Token Usage Spikes,,bf
+MAST-020,mastra,2025-10,#9584,should not convert files into base64 for LLM providers that support providing documents as URL,,bf
+ATGN-002,autogen,2025-02,#5317,Infinite loop in quick start sample with additional agent,,bu
+LANG-031,langchain,2023-08,#9535,Regression in structured_chat agent Output parser,,bu
+LANG-014,langchain,2023-08,#9717,Langchain QA over large documents results in Rate limit errors,,bu
+PYAI-003,pydantic-ai,2026-02,#4364,Anthropic cache tokens double-counted in Langfuse/OTel,,bu
+CRAI-013,crewai,2025-05,#2755,How to load pre-existing embeddings as Knowledge Source,,bu
+ATGN-018,autogen,2023-12,#1070,Cost calculation for the whole chat session,,fr
+LANG-013,langgraph,2025-08,#6027,Node Retry Policies not respected on ValidationError,,bu
+CRAI-008,crewai,2025-05,#2838,Manager agent repeatedly performs tasks,,bu
+DSPY-003,dspy,2024-12,#1954,Using MIPROv2 max_bootstrapped_demos > 0 with dspy.Image causes context to blow up,,bu
+LANG-007,langsmith,2025-09,#2024,Cost showing up as 0 despite having tokens,,bu
+LANG-004,langchain,2025-02,#29779,Reasoning tokens not in cost calculation,,bu
+LANG-037,langchain,2025-07,#32252,LangChain-OpenAI raises error due to null choices when using vLLM OpenAI-compatible API,,bu
+AIDR-006,aider,2025-04,#3803,"DeepSeek R1 thinking in thousands of tokens, cannot limit",,bu
+CCDE-002,claude-code,2025-08,#6461,[Bug] [Has Workaround] Auto-Compact Resetting Context Limit To 4-6% Causing Frequent Compaction Loop,,bu
+SMAG-004,smolagents,2025-04,#1129,Is there a step timeout feature?,,fr
+CRAI-009,crewai,2025-06,#2938,Crew Agent Experiencing Issues with Basic Task Execution,,bu
+ATGN-005,autogen,2023-10,#156,Roadmap for handling context overflow,,fr
+LANG-036,langchain,2026-01,#34873,Support approximate token counting for image blocks in langchain-core,,fr
+GPTE-003,gpt-engineer,2023-06,#322,Track and log token usage,,fr
+SMAG-001,smolagents,2025-02,#559,Getting Token Usage as part of the Final Answer,,fr
+AGPT-001,autogpt,2023-04,#6,Make Auto-GPT aware of running cost,,fr
+PCLP-001,paperclipai,2026-03,#390,Agent circuit breaker; #1 pain point across all multi-agent tools,,mf
+CRAI-011,crewai,2025-11,#3847,Agent loop is not stopped after max iterations reached,,bf
+AIDR-004,aider,2024-07,#863,Tokens leak: 11k tokens for small change,,mf
