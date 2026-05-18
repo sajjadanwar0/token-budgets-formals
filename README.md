@@ -136,4 +136,4 @@ See the main repository [token-budgets](https://github.com/sajjadanwar0/token-bu
 
 ## License
 
-[Add license. CC-BY-4.0 recommended for data; Apache-2.0 OR MIT for code.]
+Dual MIT/Apache-2.0. See `LICENSE-MIT` and `LICENSE-APACHE`.
