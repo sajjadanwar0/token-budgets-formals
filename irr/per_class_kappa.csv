@@ -1,0 +1,7 @@
+class,kappa,observed_agreement,rater_a_n,rater_b_n,both_positive,interpretation_landis_koch
+bf,0.8524,0.9450,26,28,24,almost_perfect
+bu,0.8716,0.9358,55,52,50,almost_perfect
+fr,0.7154,0.9083,21,23,17,substantial
+mf,0.9182,0.9908,7,6,6,almost_perfect
+confirmed_subset_bf_or_bu,0.9404,0.9737,81,80,74,almost_perfect
+overall_all_109,0.8316,0.8899,109,109,,almost_perfect
