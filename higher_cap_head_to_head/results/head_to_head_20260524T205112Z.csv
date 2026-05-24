@@ -1,0 +1,181 @@
+cap,trial,framework,calls_admitted,calls_refused,total_billed_uc,overshoot,refusal_point,exception,notes
+5000,1,token_budgets,1,0,3,0,completed_within_budget,,
+5000,1,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+5000,2,token_budgets,1,0,3,0,completed_within_budget,,
+5000,2,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+5000,3,token_budgets,1,0,3,0,completed_within_budget,,
+5000,3,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+5000,4,token_budgets,1,0,3,0,completed_within_budget,,
+5000,4,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+5000,5,token_budgets,1,0,3,0,completed_within_budget,,
+5000,5,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+5000,6,token_budgets,1,0,3,0,completed_within_budget,,
+5000,6,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+5000,7,token_budgets,1,0,3,0,completed_within_budget,,
+5000,7,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+5000,8,token_budgets,1,0,3,0,completed_within_budget,,
+5000,8,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+5000,9,token_budgets,1,0,3,0,completed_within_budget,,
+5000,9,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+5000,10,token_budgets,1,0,3,0,completed_within_budget,,
+5000,10,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+5000,11,token_budgets,1,0,3,0,completed_within_budget,,
+5000,11,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+5000,12,token_budgets,1,0,3,0,completed_within_budget,,
+5000,12,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+5000,13,token_budgets,1,0,3,0,completed_within_budget,,
+5000,13,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+5000,14,token_budgets,1,0,3,0,completed_within_budget,,
+5000,14,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+5000,15,token_budgets,1,0,3,0,completed_within_budget,,
+5000,15,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+5000,16,token_budgets,1,0,3,0,completed_within_budget,,
+5000,16,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+5000,17,token_budgets,1,0,3,0,completed_within_budget,,
+5000,17,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+5000,18,token_budgets,1,0,3,0,completed_within_budget,,
+5000,18,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+5000,19,token_budgets,1,0,3,0,completed_within_budget,,
+5000,19,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+5000,20,token_budgets,1,0,3,0,completed_within_budget,,
+5000,20,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+5000,21,token_budgets,1,0,3,0,completed_within_budget,,
+5000,21,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+5000,22,token_budgets,1,0,3,0,completed_within_budget,,
+5000,22,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+5000,23,token_budgets,1,0,3,0,completed_within_budget,,
+5000,23,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+5000,24,token_budgets,1,0,3,0,completed_within_budget,,
+5000,24,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+5000,25,token_budgets,1,0,3,0,completed_within_budget,,
+5000,25,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+5000,26,token_budgets,1,0,3,0,completed_within_budget,,
+5000,26,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+5000,27,token_budgets,1,0,3,0,completed_within_budget,,
+5000,27,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+5000,28,token_budgets,1,0,3,0,completed_within_budget,,
+5000,28,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+5000,29,token_budgets,1,0,3,0,completed_within_budget,,
+5000,29,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+5000,30,token_budgets,1,0,3,0,completed_within_budget,,
+5000,30,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+10000,1,token_budgets,1,0,3,0,completed_within_budget,,
+10000,1,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+10000,2,token_budgets,1,0,3,0,completed_within_budget,,
+10000,2,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+10000,3,token_budgets,1,0,3,0,completed_within_budget,,
+10000,3,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+10000,4,token_budgets,1,0,3,0,completed_within_budget,,
+10000,4,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+10000,5,token_budgets,1,0,3,0,completed_within_budget,,
+10000,5,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+10000,6,token_budgets,1,0,3,0,completed_within_budget,,
+10000,6,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+10000,7,token_budgets,1,0,3,0,completed_within_budget,,
+10000,7,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+10000,8,token_budgets,1,0,3,0,completed_within_budget,,
+10000,8,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+10000,9,token_budgets,1,0,3,0,completed_within_budget,,
+10000,9,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+10000,10,token_budgets,1,0,3,0,completed_within_budget,,
+10000,10,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+10000,11,token_budgets,1,0,3,0,completed_within_budget,,
+10000,11,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+10000,12,token_budgets,1,0,3,0,completed_within_budget,,
+10000,12,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+10000,13,token_budgets,1,0,3,0,completed_within_budget,,
+10000,13,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+10000,14,token_budgets,1,0,3,0,completed_within_budget,,
+10000,14,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+10000,15,token_budgets,1,0,3,0,completed_within_budget,,
+10000,15,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+10000,16,token_budgets,1,0,3,0,completed_within_budget,,
+10000,16,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+10000,17,token_budgets,1,0,3,0,completed_within_budget,,
+10000,17,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+10000,18,token_budgets,1,0,3,0,completed_within_budget,,
+10000,18,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+10000,19,token_budgets,1,0,3,0,completed_within_budget,,
+10000,19,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+10000,20,token_budgets,1,0,3,0,completed_within_budget,,
+10000,20,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+10000,21,token_budgets,1,0,3,0,completed_within_budget,,
+10000,21,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+10000,22,token_budgets,1,0,3,0,completed_within_budget,,
+10000,22,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+10000,23,token_budgets,1,0,3,0,completed_within_budget,,
+10000,23,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+10000,24,token_budgets,1,0,3,0,completed_within_budget,,
+10000,24,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+10000,25,token_budgets,1,0,3,0,completed_within_budget,,
+10000,25,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+10000,26,token_budgets,1,0,3,0,completed_within_budget,,
+10000,26,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+10000,27,token_budgets,1,0,3,0,completed_within_budget,,
+10000,27,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+10000,28,token_budgets,1,0,3,0,completed_within_budget,,
+10000,28,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+10000,29,token_budgets,1,0,3,0,completed_within_budget,,
+10000,29,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+10000,30,token_budgets,1,0,3,0,completed_within_budget,,
+10000,30,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+20000,1,token_budgets,1,0,3,0,completed_within_budget,,
+20000,1,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+20000,2,token_budgets,1,0,3,0,completed_within_budget,,
+20000,2,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+20000,3,token_budgets,1,0,3,0,completed_within_budget,,
+20000,3,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+20000,4,token_budgets,1,0,3,0,completed_within_budget,,
+20000,4,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+20000,5,token_budgets,1,0,3,0,completed_within_budget,,
+20000,5,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+20000,6,token_budgets,1,0,3,0,completed_within_budget,,
+20000,6,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+20000,7,token_budgets,1,0,3,0,completed_within_budget,,
+20000,7,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+20000,8,token_budgets,1,0,3,0,completed_within_budget,,
+20000,8,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+20000,9,token_budgets,1,0,3,0,completed_within_budget,,
+20000,9,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+20000,10,token_budgets,1,0,3,0,completed_within_budget,,
+20000,10,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+20000,11,token_budgets,1,0,3,0,completed_within_budget,,
+20000,11,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+20000,12,token_budgets,1,0,3,0,completed_within_budget,,
+20000,12,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+20000,13,token_budgets,1,0,3,0,completed_within_budget,,
+20000,13,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+20000,14,token_budgets,1,0,3,0,completed_within_budget,,
+20000,14,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+20000,15,token_budgets,1,0,3,0,completed_within_budget,,
+20000,15,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+20000,16,token_budgets,1,0,3,0,completed_within_budget,,
+20000,16,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+20000,17,token_budgets,1,0,3,0,completed_within_budget,,
+20000,17,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+20000,18,token_budgets,1,0,3,0,completed_within_budget,,
+20000,18,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+20000,19,token_budgets,1,0,3,0,completed_within_budget,,
+20000,19,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+20000,20,token_budgets,1,0,3,0,completed_within_budget,,
+20000,20,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+20000,21,token_budgets,1,0,3,0,completed_within_budget,,
+20000,21,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+20000,22,token_budgets,1,0,3,0,completed_within_budget,,
+20000,22,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+20000,23,token_budgets,1,0,3,0,completed_within_budget,,
+20000,23,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+20000,24,token_budgets,1,0,3,0,completed_within_budget,,
+20000,24,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+20000,25,token_budgets,1,0,3,0,completed_within_budget,,
+20000,25,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+20000,26,token_budgets,1,0,3,0,completed_within_budget,,
+20000,26,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+20000,27,token_budgets,1,0,3,0,completed_within_budget,,
+20000,27,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+20000,28,token_budgets,1,0,3,0,completed_within_budget,,
+20000,28,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+20000,29,token_budgets,1,0,3,0,completed_within_budget,,
+20000,29,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed
+20000,30,token_budgets,1,0,3,0,completed_within_budget,,
+20000,30,agent_contracts,,,,,,setup:TypeError:ResourceConstraints.__init__() got an unexpected keyword argument 'max_input_tokens',Contract instantiation failed

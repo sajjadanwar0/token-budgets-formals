@@ -158,7 +158,7 @@ def run_agent_contracts_arm(cap_uc: int, trial: int, client) -> dict:
     try:
         # Import lazily so the script can run even without ai-agent-contracts
         # installed (the Token Budgets arm doesn't need it)
-        from ai_agent_contracts import Contract, ResourceConstraints
+        from agent_contracts import Contract, ResourceConstraints
         constraints = ResourceConstraints(
             max_input_tokens=cap_uc,    # Note: AC measures in tokens; ours is uc.
             max_output_tokens=MAX_OUTPUT_TOKENS,
@@ -174,8 +174,8 @@ def run_agent_contracts_arm(cap_uc: int, trial: int, client) -> dict:
             "total_billed_uc": "",
             "overshoot": "",
             "refusal_point": "",
-            "exception": "ImportError:ai_agent_contracts not installed",
-            "notes": "Install ai-agent-contracts==0.3.2",
+            "exception": "ImportError:agent_contracts not installed",
+            "notes": "Install ai-agent-contracts (importable as agent_contracts)==0.3.2",
         }
     except Exception as e:
         return {
@@ -278,7 +278,7 @@ def main() -> int:
         print("DRY-RUN: validating harness only (no API calls).")
         print("  Token Budgets arm reachable: yes")
         try:
-            import ai_agent_contracts  # noqa: F401
+            import agent_contracts  # noqa: F401
             print("  Agent Contracts arm reachable: yes")
         except ImportError:
             print("  Agent Contracts arm reachable: no (ai-agent-contracts not installed)")
