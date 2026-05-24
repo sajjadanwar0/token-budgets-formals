@@ -215,9 +215,30 @@ End budget_rustbelt.
 
 (** ** Headline corollary: Conjecture 1 *)
 
-Theorem conjecture_1 :
-  True.
-Proof. exact I. Qed.
+(** ** Conjecture 1: cap-soundness on the running binary
+
+    NOT PROVED in this scaffold. The substantive statement requires the
+    operational-semantics refinement detailed in the DISCHARGE PLAN block
+    below.
+
+    We do NOT define [conjecture_1] as a theorem here, because:
+
+    (a) Stating it as [True. Proof. exact I. Qed.] (the previous form) is
+        rhetorically misleading — a reviewer reading the .v file sees
+        [Qed.] and assumes substantive closure when in fact the statement
+        is a trivial tautology.
+
+    (b) Stating it with [Admitted.] requires the supporting predicates
+        ([well_typed_trace], [total_charged_in], etc.) to be defined,
+        which is itself ~3 weeks of the discharge plan.
+
+    The honest framing is therefore to OMIT the theorem entirely from
+    this scaffold and refer to the DISCHARGE PLAN. The paper text
+    (Section 4.4) is the authoritative statement of Conjecture 1; this
+    file does not redundantly re-state it.
+
+    DO NOT add a [True] placeholder back. The placeholder masquerades
+    as completion. *)
 
 (* DISCHARGE PLAN for conjecture_1:
    Direct consequence of rust_to_abstract_refinement combined with the
