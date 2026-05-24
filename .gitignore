@@ -1,0 +1,17 @@
+/target/
+/target-*/
+**/target/
+**/target-*/
+coq/*.vo
+coq/*.vok
+coq/*.vos
+coq/*.glob
+coq/.*.aux
+coq/Makefile
+coq/Makefile.conf
+coq/compile.log
+rustbelt/
+/.idea/
+/.vscode/
+*.swp
+.DS_Store
