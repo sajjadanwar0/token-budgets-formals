@@ -8,7 +8,7 @@ targets for the journal extension. This script provides the scaffolding
 to actually carry out IRR coding once a second rater is available:
 
   1. Stratified random sample selector. Draws a sample of N rows from
-     budget-archaeology.csv stratified by tag (bf, bu, fr, mf) so each
+     catalogue.csv stratified by tag (bf, bu, fr, mf) so each
      class is proportionally represented. Outputs a "coding sheet" CSV
      with the row's URL and quoted evidence but the original tag and
      classification redacted, ready for the second rater.
@@ -57,7 +57,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
-CATALOG_PATH = Path("budget-archaeology.csv")
+CATALOG_PATH = Path("catalogue.csv")
 DEFAULT_SAMPLE_SIZE = 109
 TAG_CLASSES = ["bf", "bu", "fr", "mf"]
 TAG_LONG = {
@@ -429,7 +429,7 @@ def main() -> int:
     p_sample.add_argument("--seed", type=int, default=42,
                           help="Random seed for reproducibility")
     p_sample.add_argument("--catalog", type=Path, default=CATALOG_PATH,
-                          help=f"Path to budget-archaeology.csv "
+                          help=f"Path to catalogue.csv "
                                f"(default {CATALOG_PATH})")
     p_sample.add_argument("--output", type=Path, default=Path("coding_sheet.csv"),
                           help="Output path for the coding sheet")
