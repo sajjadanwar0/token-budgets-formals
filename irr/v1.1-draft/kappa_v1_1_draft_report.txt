@@ -1,0 +1,93 @@
+M6 IRR re-annotation under Codebook v1.1-draft -- RESULT REPORT
+============================================================
+
+Generated: 2026-05-26T22:18:51.992228+00:00
+Script: compute_v1_1_kappa.py
+
+INPUTS
+  Rater B returned sheet: returned_sheet_22cases.csv
+    SHA-256: ea013fcfb663dcc6f54557e775f7ed41deb8606b3939192b265dd8fac8424ee0
+  Hidden v1.0 labels:     [archived locally; not committed]
+    SHA-256: 6cc323efa2ab4e7b1579a42de5830ff5e7975a1d77c36a6b69fc64855bd14ba2
+
+SAMPLE
+  N pairs: 22
+  v1.0 label distribution: {'fr': 22}
+  v1.1 label distribution: {'fr': 7, 'bu': 5, 'bf': 10}
+
+RESULTS
+  kappa_fr_v1.1-draft (one-vs-rest on `fr`): 0.0000
+    (n positive pairs: 22)
+  kappa_overall on the 22 cases: 0.0000
+  Rows changed (v1.0 fr -> v1.1 other): 15
+
+PRE-COMMITTED DECISION (from paper section 8.3, M6):
+  kappa_fr_v1.1 >= 0.85         -> (i) RULE CONFIRMED
+  0.75 <= kappa_fr_v1.1 < 0.85  -> (ii) RULE CONFIRMED WITH NOTE
+  kappa_fr_v1.1 < 0.75          -> (iii) SUBSTANTIVE REVISION REQUIRED
+
+OUTCOME: (iii) SUBSTANTIVE REVISION REQUIRED
+
+METHODOLOGICAL DIAGNOSIS (added post-hoc):
+  The kappa = 0.0000 result is mathematically degenerate. The 22-case
+  sample is fr-only by construction (filtered from the 113-case IRR
+  sample). When one rater has prevalence = 1.0 on the target class,
+  Cohen's kappa formula degenerates: observed and expected agreement
+  are both equal to the v1.1 fr-prevalence, so kappa = 0 regardless of
+  the actual reclassification pattern.
+
+  The v1.1-draft attempt was therefore superseded by v1.1-final, which
+  re-rates the full 113-case sample (where kappa is mathematically
+  meaningful). See ../v1.1-final/kappa_v1_1_final_report.txt.
+
+ALSO IDENTIFIED IN POST-HOC REVIEW:
+  Codebook v1.1-draft rule v1.1.1 (PR-linkage override) was identified
+  as semantically aggressive on grounds independent of the kappa
+  outcome: the rule conflated "feature shipped via PR" with "bug fix
+  shipped", which is a logical issue regardless of empirical result.
+  v1.1.1 was retracted in codebook_v1_1_final.md (see ../v1.1-final/).
+  The retraction did not produce a more favourable kappa on the
+  113-case sample (kappa = 0.075), confirming the retraction was not
+  result-chasing.
+
+RECLASSIFIED ROWS (v1.0 fr -> v1.1-draft other):
+  AIDR-009: v1.0=fr -> v1.1=bu
+    rationale: The thread documents repeated context-limit failures and workflow disruption in real sessions while the requested manual compaction control remains unshipped.
+  ATGN-005: v1.0=fr -> v1.1=bf
+    rationale: The issue was closed with linked PRs implementing the context-overflow handling roadmap, satisfying the v1.1 fixed-by-framework criterion.
+  ATGN-006: v1.0=fr -> v1.1=bu
+    rationale: Maintainers explicitly acknowledged inaccurate and incomplete token accounting in TaskResult while no released fix existed at fetch time.
+  ATGN-007: v1.0=fr -> v1.1=bf
+    rationale: The missing token-count visibility was accepted and fixed through PR #179 within two days of filing.
+  ATGN-018: v1.0=fr -> v1.1=bf
+    rationale: The issue was closed through PR #1269 adding usage summaries, which overrides the decision tree under rule v1.1.1.
+  GPTE-003: v1.0=fr -> v1.1=bf
+    rationale: The project owner filed the missing token-logging feature and it was shipped through PR #438.
+  LANG-036: v1.0=fr -> v1.1=bf
+    rationale: The approximate token-counting defect for multimodal image blocks was fixed via merged PR #34883.
+  LLMI-003: v1.0=fr -> v1.1=bf
+    rationale: The missing cost/token-counting capability was resolved through the documented TokenCountingHandler implementation.
+  MAST-002: v1.0=fr -> v1.1=bf
+    rationale: The issue was closed as completed with linked implementation work exposing token usage tracking.
+  MAST-003: v1.0=fr -> v1.1=bf
+    rationale: The requested network-level token aggregation feature was implemented and merged through PR #9649.
+  MAST-009: v1.0=fr -> v1.1=bf
+    rationale: Provider-level cost and cache-control options were added through merged PR #10649.
+  PYAI-002: v1.0=fr -> v1.1=bu
+    rationale: The issue documents a concrete hard-cap failure mode where entire tool-call batches are rejected and the framework lacks a graceful budget-awareness fix.
+  SMAG-001: v1.0=fr -> v1.1=bf
+    rationale: The issue was closed as completed by pointing users to the existing monitor-based token usage mechanism.
+  SMAG-002: v1.0=fr -> v1.1=bu
+    rationale: The thread documents persistent runtime context-growth and cost problems with no integrated memory-consolidation solution merged upstream.
+  SMAG-004: v1.0=fr -> v1.1=bu
+    rationale: The issue contains concrete reproduction details for runaway wall-clock execution while maintainers acknowledge the timeout-control gap remains unresolved.
+
+REPRODUCIBILITY:
+  Anyone with the rater B sheet (returned_sheet_22cases.csv) and the
+  archived hidden labels file can re-run compute_v1_1_kappa.py and
+  verify the kappa values and decision string match. The decision rule
+  is mechanical; no author judgement enters.
+
+STATUS: SUPERSEDED by v1.1-final (see ../v1.1-final/).
+This v1.1-draft directory is retained for transparency about the
+methodological iteration documented in paper section 8.3 M6.
