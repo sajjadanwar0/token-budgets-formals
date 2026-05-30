@@ -1,28 +1,8 @@
-#!/usr/bin/env python3
-"""
-compute_cluster_kappa.py  --  STEP 3 of the cluster-IRR pipeline.
-
-Computes, for the 8-cluster mechanism taxonomy:
-  - overall multiclass Cohen's kappa (rater A vs rater B),
-  - per-cluster one-vs-rest kappa,
-  - observed agreement,
-  - a full confusion matrix (shows WHICH boundaries are soft).
-
-Stdlib only (no sklearn), mirroring compute_v1_1_kappa.py.
-
-Usage:
-  python3 compute_cluster_kappa.py \
-      --hidden hidden_cluster_labels.csv \
-      --rater-b returned_cluster_sheet.csv \
-      --report cluster_kappa_report.txt
-"""
 import argparse, csv
 from collections import Counter, defaultdict
 from pathlib import Path
 
-
 def cohen_kappa(a, b):
-    """Multiclass Cohen's kappa from paired label lists a, b."""
     n = len(a)
     labels = sorted(set(a) | set(b))
     po = sum(1 for x, y in zip(a, b) if x == y) / n
@@ -37,13 +17,10 @@ def one_vs_rest(a, b, label):
     bb = [1 if x == label else 0 for x in b]
     return cohen_kappa(aa, bb)
 
-
 def _reader(path: Path):
-    """DictReader that tolerates stray comment lines / BOM."""
     lines = [ln for ln in path.read_text(encoding="utf-8-sig").splitlines()
              if not ln.lstrip().startswith("#")]
     return csv.DictReader(lines)
-
 
 def main():
     ap = argparse.ArgumentParser()
@@ -96,17 +73,10 @@ def main():
     for x in labels:
         row = short[x].ljust(14) + "".join(str(cm[x][y]).ljust(12) for y in labels)
         lines.append(row)
-    lines.append("")
-    lines.append("INTERPRETATION GUIDANCE: report whatever kappa results. For a")
-    lines.append("mechanism taxonomy with soft boundaries, moderate-to-substantial")
-    lines.append("(0.4-0.7) is normal and defensible WHEN reported with this")
-    lines.append("confusion matrix and a note on the confused pairs. Do NOT re-code")
-    lines.append("to inflate. A high M-other count signals taxonomy incompleteness.")
 
     report = "\n".join(lines) + "\n"
     args.report.write_text(report, encoding="utf-8")
     print(report)
-
 
 if __name__ == "__main__":
     main()
