@@ -1,5 +1,10 @@
 # Token Capabilities catalog: codebook v1.0
 
+> **Superseded (mechanism taxonomy):** Section 6's mechanism list is
+> superseded by `Codebook_v1.2_clusters.md`, which defines the eight
+> canonical clusters and the single-primary precedence rule used for
+> the `primary_cluster` column in `catalogue_with_primary_cluster.csv`.
+
 This codebook formalizes the inclusion, classification, and exclusion
 rules used to construct the failure catalog reported in the Token
 Capabilities paper. It is derived from the implicit rules used to

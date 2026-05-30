@@ -1,21 +1,4 @@
-(** * BudgetAbstract.v
 
-    Tier A of the Conjecture 1 proof: the abstract state machine M.
-    Pure Coq, standard library only, no Iris dependency.
-
-    This file is a refinement-ready version of the existing budget.v.
-    The key additions over budget.v are:
-    - An explicit [budget_action] inductive enumerating the eight transitions
-      (rather than implicit constructors of the [reachable] relation), so
-      that Iris-level proofs can index over actions when discharging
-      Hoare triples.
-    - A [step] function and the equivalence between [step]-based reachability
-      and the original [reachable] inductive.
-    - Total functional definitions (no nondeterminism) so the abstract
-      machine can be a refinement target for a deterministic Rust binary.
-
-    Status: complete, no Admitted, no axioms. Compile with: coqc BudgetAbstract.v
-*)
 
 From Coq Require Import Arith Lia List Bool.
 Import ListNotations.
