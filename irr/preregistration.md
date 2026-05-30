@@ -7,6 +7,7 @@ frame whose selection criterion is **independent of whether the failure
 occurred**.
 
 **Date registered:** __________  **Commit SHA:** __________
+<!-- Fill the two fields above from the registering commit (see repo instructions). -->
 
 ---
 
@@ -27,12 +28,18 @@ prevalence.
 - **Population:** GitHub repositories under topic `llm-agent` OR
   `ai-agent` OR `agent-framework`.
 - **Selection:** the top **N = 40** by star count as observed on a
-  single fixed date **D = __________**, retrieved via the GitHub search
-  API query string `__________` (record the exact query and the raw
-  result list as `frame_snapshot_D.json`).
-- **Exclusions:** the 21 sub-projects already in the main catalog
-  (list them); non-English primary docs; archived/read-only repos;
-  repos with <__ issues. Record every exclusion with a reason.
+  single fixed date **D = 2026-06-01** (set to the date `collect_complementary_frame.py`
+  is run; it must be on or after the registering commit), retrieved via
+  the GitHub search API query string:
+  `topic:llm-agent` , `topic:ai-agent` , `topic:agent-framework`
+  (each `sort=stars&order=desc&per_page=100`), de-duplicated across the
+  three queries and re-sorted by star count; take the top 40 surviving
+  exclusions. Record the exact queries and the raw result list as
+  `frame_snapshot_D.json`.
+- **Exclusions:** the **21 sub-projects already in the main catalog**
+  (listed in `excluded_subprojects.txt`); non-English primary docs;
+  archived/read-only repos; repos with **< 20 issues**. Record every
+  exclusion with a reason in `complementary_frame.csv`.
 - Freeze the resulting repo list as `complementary_frame.csv` before
   reading any issues.
 
@@ -40,13 +47,13 @@ prevalence.
 
 For each repo in the frame, in list order:
 
-1. Pull the **M = 30** most-commented issues (state/open+closed),
+1. Pull the **M = 30** most-commented issues (state = open+closed),
    regardless of content, via a fixed API call (record the call).
 2. For each issue, two coders independently apply the **same Section-2
    inclusion criteria** as the main catalog (budget-overrun incident or
    budget-primitive-missing condition with evidence).
 3. For each **included** issue, both coders assign one primary cluster
-   from `codebook_v1.2_clusters.md` (the eight + `M-other`).
+   from `Codebook_v1.2_clusters.md` (the eight + `M-other`).
 
 The procedure is mechanical: no "search until a failure is found."
 Every screened issue gets an include/exclude decision recorded.
