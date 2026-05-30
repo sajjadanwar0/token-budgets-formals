@@ -6,7 +6,7 @@ sample / selection on the dependent variable" threat by drawing from a
 frame whose selection criterion is **independent of whether the failure
 occurred**.
 
-**Date registered:** __________  **Commit SHA:** __________
+**Date registered:** 2026-05-30T15:06:53+05:00  **Commit SHA:** 3a75c87ddd5dff1266e0688b2f2d6b4c93452d47
 <!-- Fill the two fields above from the registering commit (see repo instructions). -->
 
 ---
