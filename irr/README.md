@@ -25,14 +25,16 @@ tags) and prints the overall, per-class, and confirmed-subset kappas above.
 | File | What it is |
 |---|---|
 | `catalogue.csv` | the full corrected catalog (167 rows = 110 retained + 57 triaged) with the `label` (rater-A authoritative tag) and `primary_cluster` columns. Ground truth for all counts; needed for catalog-level and cluster computations. |
-| `independent_second_human_annotator_113.csv` | the IRR data — 113 issues with `rater_a_tag` and `rater_b_tag`. Self-contained. |
+| `independent_second_human_annotator_113.csv` | the IRR data — 113 issues with `rater_a_tag`, `rater_b_tag`, `phase`, and `rater_b_notes`. Self-contained. |
+| `independent_second_human_annotator_109.csv` | the Phase-1 subset (`phase == 1`), reconstructed deterministically from the 113-row file for audit traceability; recomputes to kappa = 0.832. |
+| `coding_sheet_phase1_reconstructed.csv` | the blinded Phase-1 coding *instrument* (issue metadata, empty `rater_b_tag`, no rater-A tags) — the sheet the second rater filled in, reconstructed from committed data. |
 | `irr_scaffold.py` | the script `reproduce.sh` (check 14) invokes: `python3 irr_scaffold.py compute --input independent_second_human_annotator_113.csv` -> prints `Pairs analyzed: 113`, `Cohen's kappa: 0.837`. |
 | `compute_irr.py` | stdlib recompute of overall/per-class/confirmed kappas (convenience; same result). |
 | `per_class_kappa.csv` | the pre-computed per-class / overall / confirmed-subset table. |
 | `codebook_v1.md` | the labeling codebook (bf/bu/mf/fr definitions, inclusion/exclusion). |
-| `RATER_BRIEF.md` | instructions given to the independent second rater. |
-| `IRR_COVERAGE_NOTE.md` | which rows were double-coded and why (coverage). |
-| `zahid_phase2_completed.csv` | the second rater's completed phase-2 return (provenance). |
+| `RATER_BRIEF.md` | the coding instrument (instructions + category definitions) given to the second rater; see its scope note for the two-phase, tag-only Phase-1 design. |
+| `IRR_COVERAGE_NOTE.md` | two-phase design, coverage, why Phase 1 carries tags but no notes, and the reconstructed-file provenance. |
+| `zahid_phase2_completed.csv` | the second rater's completed Phase-2 return, with rationales (provenance). |
 | `v1.1-final/` | the codebook-v1.1 boundary-sharpening reclassification (the pre-registered fr/bu sensitivity analysis referenced in the paper). |
 
 ## Label scheme
