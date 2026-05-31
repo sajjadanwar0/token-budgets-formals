@@ -1,4 +1,51 @@
+#!/usr/bin/env python3
+"""
+Inter-rater reliability (IRR) scaffold for the failure catalog.
+
+Paper Section 5.6 acknowledges that the 109-row catalog was coded by a
+single rater and that inter-rater reliability statistics are first-class
+targets for the journal extension. This script provides the scaffolding
+to actually carry out IRR coding once a second rater is available:
+
+  1. Stratified random sample selector. Draws a sample of N rows from
+     catalogue.csv stratified by tag (bf, bu, fr, mf) so each
+     class is proportionally represented. Outputs a "coding sheet" CSV
+     with the row's URL and quoted evidence but the original tag and
+     classification redacted, ready for the second rater.
+
+  2. Sample size justification. For two-rater Cohen's kappa with the
+     class distribution observed in our catalog (25/59/6/19 across
+     bf/bu/mf/fr), N=30 is a reasonable lower bound for kappa standard
+     error under 0.10 assuming kappa around 0.80 (Bujang & Baharum 2017;
+     Sim & Wright 2005).
+
+  3. Kappa computation. Once the second rater returns the coded sheet,
+     this script computes Cohen's kappa, weighted kappa for the ordinal
+     resolution-shape categories, per-class agreement rates, and a
+     bootstrapped 95% confidence interval. Prints a summary table the
+     paper §5.6 can quote directly.
+
+  4. Disagreement diagnostics. For any rows where the two raters
+     disagree, this script prints the row's URL, evidence, and both
+     codings side-by-side, so the disagreements can be adjudicated
+     (or recorded as legitimate ambiguity).
+
+Usage:
+    # Step 1: rater A is the original (Sajjad). Generate the sample.
+    python3 irr_scaffold.py sample --n 30 --output coding_sheet.csv
+
+    # Step 2: rater B (independent) fills in the `rater_b_tag` column
+    # of coding_sheet.csv without seeing the original notes column.
+
+    # Step 3: compute kappa from the joint codings.
+    python3 irr_scaffold.py compute --input coding_sheet_completed.csv
+
+    # Step 4: list disagreements for adjudication.
+    python3 irr_scaffold.py disagreements --input coding_sheet_completed.csv
+"""
+
 from __future__ import annotations
+
 import argparse
 import csv
 import json
@@ -20,6 +67,7 @@ TAG_LONG = {
     "mf": "maintainer_framing",
 }
 
+
 @dataclass
 class CatalogRow:
     issue_id: str
@@ -28,10 +76,14 @@ class CatalogRow:
     short_url: str
     title: str
     notes: str
-    tag: Optional[str]
+    tag: Optional[str]  # extracted from notes prefix
 
 
 def extract_tag(notes: str) -> Optional[str]:
+    """Extract the catalog tag from the notes prefix.
+
+    Notes follow the pattern `paper:bf; ...`, `paper:bu; ...` etc.
+    SKIPPED rows return None."""
     if notes.startswith("SKIPPED"):
         return None
     m = re.match(r"^paper:(bf|bu|fr|mf)\b", notes)
@@ -62,6 +114,11 @@ def stratified_sample(
     n: int,
     seed: int = 42,
 ) -> List[CatalogRow]:
+    """Draw a stratified random sample by tag class.
+
+    Each class contributes int(p_class * n) rows, where p_class is its
+    proportion in the retained catalog. Remaining slots are filled by
+    largest-residual rounding to reach exactly N."""
     retained = [r for r in rows if r.tag is not None]
     if n > len(retained):
         raise ValueError(f"sample size {n} exceeds retained catalog ({len(retained)})")
@@ -85,8 +142,8 @@ def stratified_sample(
             sample.extend(rng.sample(class_rows, whole))
         fractional_remainders.append((proportional - whole, cls))
 
+    # Largest-residual to fill remaining slots
     fractional_remainders.sort(reverse=True)
-
     while len(sample) < n:
         for _, cls in fractional_remainders:
             if len(sample) >= n:
@@ -104,7 +161,24 @@ def stratified_sample(
     return sample
 
 
-def write_coding_sheet(sample: List[CatalogRow], output: Path, blind: bool = False) -> None:
+def write_coding_sheet(sample: List[CatalogRow], output: Path,
+                       blind: bool = False) -> None:
+    """Write a redacted coding sheet for the second rater.
+
+    Two redaction modes:
+
+    Default (notes preserved with tag stripped). The leading
+    `paper:(bf|bu|fr|mf)` tag is stripped from each row's notes; the
+    rest of rater A's evidence summary is preserved. The kappa this
+    produces is "agreement under shared analysis" -- weaker than blind
+    IRR but practical at N=30.
+
+    Blind (notes stripped entirely, --blind). The notes_redacted column
+    is left empty; rater B must read the GitHub URL directly to code
+    each row. Stronger IRR but takes ~3 min/issue.
+
+    Either way, the rater_b_tag column is left blank for the second
+    rater to fill in."""
     with output.open("w", newline="") as f:
         w = csv.writer(f)
         w.writerow([
@@ -115,6 +189,10 @@ def write_coding_sheet(sample: List[CatalogRow], output: Path, blind: bool = Fal
             if blind:
                 redacted = ""
             else:
+                # Strip leading tag in any of the catalog's actual forms:
+                # `paper:bf; ...`, `paper:bf with ...`, `paper:bf. ...`,
+                # `paper:bf ...`. Anchor at start, allow optional separator
+                # (semicolon, period, comma) and any whitespace.
                 redacted = re.sub(
                     r"^paper:(bf|bu|fr|mf)\b[;.,\s]*",
                     "",
@@ -122,19 +200,26 @@ def write_coding_sheet(sample: List[CatalogRow], output: Path, blind: bool = Fal
                 )
             w.writerow([
                 r.issue_id, r.framework, r.date, r.short_url, r.title,
-                redacted, r.tag, "",
+                redacted, r.tag, "",  # rater_b_tag is blank
             ])
+
 
 def cohen_kappa(
     rater_a: List[str],
     rater_b: List[str],
     classes: List[str],
 ) -> Tuple[float, Dict[str, float]]:
+    """Compute Cohen's kappa for two raters on the given class set.
+
+    Returns (kappa, per-class agreement rate)."""
     n = len(rater_a)
     assert n == len(rater_b)
 
+    # Observed agreement
     observed_agree = sum(1 for a, b in zip(rater_a, rater_b) if a == b)
     p_o = observed_agree / n
+
+    # Expected agreement by chance
     a_count = Counter(rater_a)
     b_count = Counter(rater_b)
     p_e = sum(
