@@ -8,7 +8,7 @@ govern future expansion to 100+ rows in the journal extension.
 
 Versioning: codebook v1.0 corresponds to paper v20 (the 29-row
 version). Future versions are tagged with the paper version they
-correspond to (e.g. v1.1 -> paper v21).
+track internal codebook revisions.
 
 ## 1. Scope
 
@@ -219,9 +219,9 @@ and follow this protocol:
    least 3 cases (the "n=3 minimum for a new category" rule).
 3. Draft revised codebook section(s) with examples from the new
    data.
-4. Bump version: v1.1 for minor (added mechanism category, new
-   exclusion code), v2.0 for major (changed inclusion criteria,
-   restructured tag taxonomy).
+4. Bump version: a minor bump for an added mechanism category or new
+   exclusion code, a major bump for changed inclusion criteria or a
+   restructured tag taxonomy.
 5. Back-code any rows whose v1.0 classification differs from the
    revised codebook; document changed rows in a changelog.
 

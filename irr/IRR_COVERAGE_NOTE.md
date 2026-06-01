@@ -9,7 +9,7 @@ which carries both raters' tags and the `phase` column).
 ### Phase 1 (baseline, N = 109)
 
 The original IRR campaign rated 109 catalogue rows. Rater B was Zahid
-Hussain (Mindgigs Ltd): no prior catalog exposure, no compensation,
+Hussain (Mindgigs, Peshawar, Pakistan): no prior catalog exposure, no compensation,
 blinded to the original codings. Phase 1 produced **kappa = 0.832**
 (Landis–Koch: almost perfect).
 

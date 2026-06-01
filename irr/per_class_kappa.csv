@@ -3,5 +3,5 @@ bf,0.8576,0.9469,27,29,25,almost_perfect
 bu,0.8762,0.9381,57,54,52,almost_perfect
 fr,0.7272,0.9115,22,24,18,substantial
 mf,0.9184,0.9912,7,6,6,almost_perfect
-confirmed_subset_bf_or_bu,0.9427,0.9747,84,83,77,almost_perfect
+confirmed_subset_bf_or_bu_kappa_on_n79,0.9427,0.9747,84,83,77,almost_perfect
 overall_all_113,0.8374,0.8938,113,113,,almost_perfect

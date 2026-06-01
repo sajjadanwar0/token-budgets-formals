@@ -35,7 +35,7 @@ tags) and prints the overall, per-class, and confirmed-subset kappas above.
 | `RATER_BRIEF.md` | the coding instrument (instructions + category definitions) given to the second rater; see its scope note for the two-phase, tag-only Phase-1 design. |
 | `IRR_COVERAGE_NOTE.md` | two-phase design, coverage, why Phase 1 carries tags but no notes, and the reconstructed-file provenance. |
 | `zahid_phase2_completed.csv` | the second rater's completed Phase-2 return, with rationales (provenance). |
-| `v1.1-final/` | the codebook-v1.1 boundary-sharpening reclassification (the pre-registered fr/bu sensitivity analysis referenced in the paper). |
+| `irr-disagreements.md` | the 12 rater-pair disagreements in the N=113 sample, auto-derived from `independent_second_human_annotator_113.csv` with rater A's catalogue `label` as the adjudicated resolution. |
 
 ## Label scheme
 - `bf` — confirmed budget failure (incident occurred)
