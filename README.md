@@ -17,7 +17,7 @@ proof**. The binary-level claim is Conjecture 1, deliberately open.
 ├── coq/          # Coq re-encoding + partial Conjecture-1 skeleton.
 ├── tla/          # TLA+ spec; TLAPS deductive proof + TLC model check.
 ├── dafny/        # Dafny re-encoding of the same abstract spec.
-├── irr/          # Inter-rater reliability study (kappa = 0.837 on N = 113).
+├── irr/          # IRR: four-class kappa = 0.837 (N = 113) + exploratory cluster IRR (kappa = 0.44).
 └── README.md
 ```
 
@@ -29,7 +29,8 @@ proof**. The binary-level claim is Conjecture 1, deliberately open.
 | TLC         | **252 states at B0=5, 0 violations** (exhaustive)      | Appendix B.1    |
 | Verus 0.18  | **66 obligations, 0 errors** (source-level, preliminary)| Appendix B.1    |
 | Coq / Dafny | Re-encodings of the same abstract spec (cross-tool)    | Appendix B.1    |
-| Human IRR   | **kappa = 0.837 (N = 113), 95% CI [0.746, 0.917]**     | §2.1, §5.27     |
+| Human IRR (four-class) | **kappa = 0.837 (N = 113), 95% CI [0.746, 0.917]** | §2.1, §5.27 |
+| Cluster IRR (exploratory) | **kappa = 0.44 (N = 110)**; cost-observability 0.78 and multimodal 0.65 reliably identified | §2.5, limitations |
 
 > Coq/Dafny re-verify the same invariants in additional logics rather than
 > establishing new guarantees, so per-tool obligation counts for them are not
@@ -76,22 +77,13 @@ These re-encode the same abstract specification for cross-tool confirmation.
 The Coq development additionally carries a partial skeleton for Conjecture 1
 (operational refinement to the running Tokio binary), which is **open**.
 
-## IRR study (kappa = 0.837, N = 113)
+## IRR study
 
 The `irr/` directory contains the complete materials for the two-phase
-independent re-annotation of the catalogue.
+independent re-annotation of the catalogue (four-class scheme) and the
+exploratory cluster-assignment IRR. See `irr/README.md` for the full file list.
 
-| File                                          | Purpose                                            |
-|-----------------------------------------------|----------------------------------------------------|
-| `codebook_v1.md`                              | The frozen codebook (4-tag taxonomy + 7 exclusions)|
-| `blinded_coding_sheet.csv`                    | Blank sheet given to rater B                        |
-| `independent_second_human_annotator_113.csv`  | Rater B's completed annotations (two-phase, N=113)  |
-| `per_class_kappa.csv`                         | Per-class one-vs-rest κ                              |
-| `irr-disagreements.md`                        | The 12 full-sample disagreements + adjudications     |
-| `irr_scaffold.py`                             | Cohen's κ + bootstrap-CI computation tool           |
-| `v1.1-draft/`, `v1.1-final/`                  | Superseded/primary v1.1 sharpening attempts (audit) |
-
-### Reproduce the kappa = 0.837 result
+### Four-class IRR (kappa = 0.837, N = 113) — validated
 
 ```bash
 cd irr
@@ -105,25 +97,37 @@ Pairs analyzed:          113
 Observed agreement:      0.894
 Cohen's kappa:           0.837
   Bootstrap 95% CI:      [0.746, 0.917]
-
-Per-class one-vs-rest kappa:
-  bug_fixed_by_framework (bf) : 0.858  (n=27)
-  bug_unfixed            (bu) : 0.876  (n=57)
-  maintainer_framing     (mf) : 0.918  (n=7)
-  feature_request        (fr) : 0.727  (n=22)
-Confirmed-bugs subset (bf u bu): kappa = 0.943 (n=84)
 ```
+
+`python3 compute_irr.py` additionally reports the per-class one-vs-rest kappa
+(bf 0.858, bu 0.876, mf 0.918, fr 0.727) and the **confirmed-subset kappa =
+0.943 over the n = 79 incidents both raters marked confirmed** (bf-vs-bu).
+
+### Cluster IRR (kappa = 0.44, N = 110) — exploratory
+
+```bash
+cd irr/cluster
+python3 compute_cluster_kappa.py cluster_irr_rater_a_frozen.csv cluster_irr_rater_b_frozen.csv
+```
+
+The eight mechanism clusters are an exploratory, descriptive layer; the
+independent cluster-assignment agreement is moderate (kappa = 0.44, 95% CI
+[0.34, 0.55]), with cost-observability (0.78) and multimodal (0.65) reliably
+identified and the remaining boundaries overlapping. `reproduce.sh` check 14b
+reproduces 0.4440 from the two frozen independent codings (not the live
+catalogue; see `irr/README.md`).
 
 ### IRR methodology disclosure
 
-- This is a **two-phase independent re-annotation**: Phase 1 (N=109 baseline)
-  plus Phase 2 (N=4 entries added during continued construction), giving N=113
-  rater-pair observations over the 110 current catalogue rows. Rater B coded
-  against the frozen codebook without seeing rater A's tags.
-- The `fr`/`bu` boundary is the codebook's weakest seam (κ_fr = 0.727); the
-  v1.1 sharpening attempt is committed under `v1.1-draft/` and `v1.1-final/` for
-  transparency. A fully parallel dual-coding study under a post-v1.0 codebook is
-  identified as catalogue-v2 follow-up.
+- The four-class study is a **two-phase independent re-annotation**: Phase 1
+  (N=109 baseline) plus Phase 2 (N=4 entries added during continued
+  construction), giving N=113 rater-pair observations over the 110 current
+  catalogue rows. Rater B coded against the frozen codebook without seeing rater
+  A's tags.
+- The `fr`/`bu` boundary is the four-class codebook's weakest seam (kappa_fr =
+  0.727).
+- The cluster study is a single blind second-rater pass over all 110 rows
+  against `cluster/cluster_codebook_v2.md`, reported as exploratory.
 
 ## Known issues
 
