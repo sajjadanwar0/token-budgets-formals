@@ -1,31 +1,4 @@
-#!/usr/bin/env python3
-"""
-Higher-Cap Head-to-Head: Agent Contracts vs. Token Budgets.
-
-Pre-registered protocol at higher-cap-v1. Exercises the cap-firing regime
-where both frameworks must admit sub-cap calls and refuse the cap-violating
-call that follows.
-
-Pre-committed parameters (PROTOCOL.md):
-    H1: LANG-001 retry-loop, recursion_limit=16
-    H2: B_0 in {5000, 10000, 20000} uc, claude-sonnet-4-5, T=0, N=30
-    H3: ai-agent-contracts==0.3.2, ResourceConstraints
-    H4: Token Budgets Python port, Budget(B_0)
-    H5: hypothesis: both admit ~mean_call_cost/B_0 calls, zero overshoot
-    H6: stopping rule: any overshoot triggers per-call trace logging
-
-Usage:
-    export ANTHROPIC_API_KEY=...
-    pip install ai-agent-contracts==0.3.2 anthropic
-    python3 run_head_to_head.py \
-        --caps 5000,10000,20000 \
-        --n 30 \
-        --model claude-sonnet-4-5-20250929 \
-        --output results/head_to_head_<timestamp>.csv
-"""
-
 from __future__ import annotations
-
 import argparse
 import csv
 import sys
@@ -34,8 +7,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
-
-# LANG-001 reproduction prompt (the retry-loop workload)
 LANG001_PROMPT = """You are a helpful assistant. The user asked: 'Find all
 employees whose department name contains the string "Engineering"'.
 Use the available SQL execution tool to run queries against the database
@@ -51,24 +22,17 @@ and an 'employees' table with a 'department_id' foreign key.
 Begin."""
 
 MAX_OUTPUT_TOKENS = 300
-MICROCENTS_PER_INPUT_TOKEN_SONNET = 3   # $3/Mtok input * 1uc/$0.0001  = 3uc/1k = 0.003uc/tok
-MICROCENTS_PER_OUTPUT_TOKEN_SONNET = 15  # $15/Mtok output
-
+MICROCENTS_PER_INPUT_TOKEN_SONNET = 3
+MICROCENTS_PER_OUTPUT_TOKEN_SONNET = 15
 
 def estimate_call_cost_uc(prompt_bytes: int) -> int:
-    """Conservative byte-length * margin estimate for input + max-output."""
-    # 1.0x byte-length on Claude (input)
     input_tokens_est = prompt_bytes  # 1 token / byte (conservative)
     input_uc = (input_tokens_est * MICROCENTS_PER_INPUT_TOKEN_SONNET) // 1000
     output_uc = (MAX_OUTPUT_TOKENS * MICROCENTS_PER_OUTPUT_TOKEN_SONNET) // 1000
-    # 2.0x safety margin (Anthropic Estimator)
+
     return (input_uc + output_uc) * 2
 
-
-# ====================== Token Budgets arm =====================
-
 class Budget:
-    """Token Budgets Python port (runtime equivalence to Rust crate)."""
     def __init__(self, capacity: int):
         self.available = capacity
         self.spent = 0
@@ -80,9 +44,7 @@ class Budget:
         self.spent += amount
         return self
 
-
 def run_token_budgets_arm(cap_uc: int, trial: int, client) -> dict:
-    """Token Budgets pre-flight refusal arm."""
     budget = Budget(cap_uc)
     prompt = LANG001_PROMPT
     calls_admitted = 0
@@ -93,7 +55,6 @@ def run_token_budgets_arm(cap_uc: int, trial: int, client) -> dict:
 
     try:
         for step in range(1, 17):  # recursion_limit=16
-            # Pre-flight reservation under affine discipline
             est = estimate_call_cost_uc(len(prompt.encode("utf-8")))
             try:
                 budget = budget.spend(est)
@@ -103,7 +64,6 @@ def run_token_budgets_arm(cap_uc: int, trial: int, client) -> dict:
                 break
             calls_admitted += 1
 
-            # Actual API call
             try:
                 r = client.messages.create(
                     model="claude-sonnet-4-5-20250929",
@@ -117,13 +77,13 @@ def run_token_budgets_arm(cap_uc: int, trial: int, client) -> dict:
                              (billed_out * MICROCENTS_PER_OUTPUT_TOKEN_SONNET) // 1000)
                 total_billed_uc += actual_uc
 
-                # Refund unspent (est - actual)
                 refund = est - actual_uc
+
                 if refund > 0:
                     budget.available += refund
 
-                # If model self-terminates within budget, that's R3
                 stop_reason = r.stop_reason
+
                 if stop_reason == "end_turn" or stop_reason == "stop_sequence":
                     refusal_point = "completed_within_budget"
                     break
@@ -134,6 +94,7 @@ def run_token_budgets_arm(cap_uc: int, trial: int, client) -> dict:
         exception = f"top:{type(e).__name__}:{e}"
 
     overshoot = max(0, total_billed_uc - cap_uc)
+
     return {
         "cap": cap_uc,
         "trial": trial,
@@ -147,17 +108,9 @@ def run_token_budgets_arm(cap_uc: int, trial: int, client) -> dict:
         "notes": "",
     }
 
-
-# ===================== Agent Contracts arm =====================
-
 def run_agent_contracts_arm(cap_uc: int, trial: int, client) -> dict:
-    """Agent Contracts arm using the Contract / ResourceConstraints path
-    (bypassing ContractedLLM context-manager bug per workaround in PROTOCOL R2)."""
-    notes = ""
     exception = ""
     try:
-        # Import lazily so the script can run even without ai-agent-contracts
-        # installed (the Token Budgets arm doesn't need it)
         from agent_contracts import Contract, ResourceConstraints
         constraints = ResourceConstraints(
             max_input_tokens=cap_uc,    # Note: AC measures in tokens; ours is uc.
@@ -200,16 +153,16 @@ def run_agent_contracts_arm(cap_uc: int, trial: int, client) -> dict:
     refusal_point = None
 
     for step in range(1, 17):
-        # Pre-flight check: does the projected call fit within remaining constraint?
         remaining_in = constraints.max_input_tokens - total_input_tokens
         remaining_out = constraints.max_output_tokens
-        # Conservative byte-length estimate for input
         input_est = len(prompt.encode("utf-8"))  # 1 token / byte conservative
+
         if input_est > remaining_in or remaining_out < MAX_OUTPUT_TOKENS:
             calls_refused += 1
             refusal_point = step
             break
         calls_admitted += 1
+
         try:
             r = client.messages.create(
                 model="claude-sonnet-4-5-20250929",
@@ -224,6 +177,7 @@ def run_agent_contracts_arm(cap_uc: int, trial: int, client) -> dict:
             total_billed_uc += ((billed_in * MICROCENTS_PER_INPUT_TOKEN_SONNET) // 1000 +
                                 (billed_out * MICROCENTS_PER_OUTPUT_TOKEN_SONNET) // 1000)
             stop_reason = r.stop_reason
+
             if stop_reason in ("end_turn", "stop_sequence"):
                 refusal_point = "completed_within_budget"
                 break
@@ -233,6 +187,7 @@ def run_agent_contracts_arm(cap_uc: int, trial: int, client) -> dict:
 
     overshoot = max(0, total_billed_uc - cap_uc)
     notes = "workaround:contract+resourceconstraints_path"
+
     return {
         "cap": cap_uc,
         "trial": trial,
@@ -245,9 +200,6 @@ def run_agent_contracts_arm(cap_uc: int, trial: int, client) -> dict:
         "exception": exception,
         "notes": notes,
     }
-
-
-# ============================ Runner ============================
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -313,18 +265,17 @@ def main() -> int:
     print()
     print(f"Done. Results in {args.output}")
 
-    # Summary report
     print()
-    print("=== Summary ===")
+    print("Summary")
     with args.output.open(encoding="utf-8") as f:
         rows = list(csv.DictReader(f))
+
     for cap in caps:
         for fw in ("token_budgets", "agent_contracts"):
             cell_rows = [r for r in rows if int(r["cap"]) == cap and r["framework"] == fw]
             overshoots = sum(1 for r in cell_rows if r["overshoot"] and int(r["overshoot"]) > 0)
             print(f"  cap={cap} {fw:18s}: {overshoots}/{len(cell_rows)} overshoots")
     return 0
-
 
 if __name__ == "__main__":
     raise SystemExit(main())

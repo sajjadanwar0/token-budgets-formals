@@ -1,30 +1,9 @@
 --------------------------- MODULE BudgetProofs ---------------------------
-(***************************************************************************)
-(* TLAPS proofs for Budget.tla v2 (unified-variable design).               *)
-(*                                                                         *)
-(* Proof obligations:                                                      *)
-(*   1. Init  =>  Inv                                                      *)
-(*   2. Inv /\ [Next]_vars  =>  Inv'                                       *)
-(*   3. Inv  =>  Conservation /\ CapSoundness                              *)
-(*                                                                         *)
-(* Backend: Zenon + Isabelle default chain. No SMT required.               *)
-(*                                                                         *)
-(* Each per-action lemma derives CapSoundness' inline from the primed Nat  *)
-(* facts and the Conservation' equation, matching the v1 proof style       *)
-(* (which closed with the same backend without Z3). The arithmetic is:     *)
-(*                                                                         *)
-(*   Given x1 + x2 + x3 + x4 + x5 + x6 = b and all in Nat, x4 <= b.        *)
-(*                                                                         *)
-(* This is decided by Isabelle's `arith` (Presburger) inside the default   *)
-(* tactic chain.                                                           *)
-(***************************************************************************)
+
 EXTENDS Budget, TLAPS
 
 USE B0Type
 
-(***************************************************************************)
-(* HELPER ARITHMETIC LEMMAS                                                *)
-(***************************************************************************)
 
 LEMMA NatPlusZero == \A n \in Nat : n + 0 = n
     OBVIOUS
@@ -53,9 +32,6 @@ LEMMA NatSubAddSplit ==
 LEMMA B0InNat == B0 \in Nat
     BY B0Type
 
-(***************************************************************************)
-(* INIT IMPLIES INVARIANT                                                  *)
-(***************************************************************************)
 
 LEMMA InitImpliesTypeOK == Init => TypeOK
     <1> SUFFICES ASSUME Init PROVE TypeOK
@@ -104,12 +80,6 @@ LEMMA InitImpliesInv == Init => Inv
     BY InitImpliesTypeOK, InitImpliesConservation, InitImpliesCapSoundness
        DEF Inv
 
-(***************************************************************************)
-(* SPENDSUCCESS PRESERVES INVARIANT                                        *)
-(*                                                                         *)
-(* Effect: liveSum -= r; totalCharged += c; totalUnrecoverable += (r - c). *)
-(* Conservation calculation: -r + c + (r - c) = 0.                         *)
-(***************************************************************************)
 LEMMA SpendSuccessPreservesInv ==
     Inv /\ (\E r, c \in 0..B0 : SpendSuccess(r, c)) => Inv'
     <1> SUFFICES ASSUME Inv,
@@ -162,9 +132,6 @@ LEMMA SpendSuccessPreservesInv ==
     <1>13. QED
         BY <1>7, <1>10, <1>12 DEF Inv
 
-(***************************************************************************)
-(* SPENDINSUFFICIENT PRESERVES INVARIANT (no state change)                 *)
-(***************************************************************************)
 LEMMA SpendInsufficientPreservesInv ==
     Inv /\ (\E r \in 0..(B0 + 1) : SpendInsufficient(r)) => Inv'
     <1> SUFFICES ASSUME Inv,
@@ -185,9 +152,6 @@ LEMMA SpendInsufficientPreservesInv ==
     <1>4. QED
         BY <1>3 DEF Inv
 
-(***************************************************************************)
-(* SPENDFAILPOSTCHECK PRESERVES INVARIANT                                  *)
-(***************************************************************************)
 LEMMA SpendFailPreservesInv ==
     Inv /\ (\E r, c \in 0..B0 : SpendFailPostCheck(r, c)) => Inv'
     <1> SUFFICES ASSUME Inv,
@@ -240,9 +204,6 @@ LEMMA SpendFailPreservesInv ==
     <1>13. QED
         BY <1>7, <1>10, <1>12 DEF Inv
 
-(***************************************************************************)
-(* SPLIT / MERGE PRESERVE INVARIANT (no state change)                      *)
-(***************************************************************************)
 LEMMA SplitPreservesInv == Inv /\ Split => Inv'
     <1> SUFFICES ASSUME Inv, Split PROVE Inv'
         OBVIOUS
@@ -275,9 +236,6 @@ LEMMA MergePreservesInv == Inv /\ Merge => Inv'
     <1>4. QED
         BY <1>3 DEF Inv
 
-(***************************************************************************)
-(* CONSUME PRESERVES INVARIANT                                             *)
-(***************************************************************************)
 LEMMA ConsumePreservesInv ==
     Inv /\ (\E amount \in 1..B0 : Consume(amount)) => Inv'
     <1> SUFFICES ASSUME Inv,
@@ -324,10 +282,6 @@ LEMMA ConsumePreservesInv ==
     <1>12. QED
         BY <1>6, <1>9, <1>11 DEF Inv
 
-(***************************************************************************)
-(* RESERVE PRESERVES INVARIANT                                             *)
-(* Effect: liveSum -= r; outstandingReceipts += r.                         *)
-(***************************************************************************)
 LEMMA ReservePreservesInv ==
     Inv /\ (\E r \in 1..B0 : Reserve(r)) => Inv'
     <1> SUFFICES ASSUME Inv,
@@ -374,11 +328,6 @@ LEMMA ReservePreservesInv ==
     <1>12. QED
         BY <1>6, <1>9, <1>11 DEF Inv
 
-(***************************************************************************)
-(* CONFIRMWITHREFUND PRESERVES INVARIANT                                   *)
-(* Effect: outstandingReceipts -= r; totalCharged += c;                    *)
-(*         outstandingRefunds += (r - c).                                  *)
-(***************************************************************************)
 LEMMA ConfirmWithRefundPreservesInv ==
     Inv /\ (\E r, c \in 0..B0 : ConfirmWithRefund(r, c)) => Inv'
     <1> SUFFICES ASSUME Inv,
@@ -433,10 +382,6 @@ LEMMA ConfirmWithRefundPreservesInv ==
     <1>13. QED
         BY <1>7, <1>10, <1>12 DEF Inv
 
-(***************************************************************************)
-(* FORFEIT PRESERVES INVARIANT                                             *)
-(* Effect: outstandingReceipts -= r; totalUnrecoverable += r.              *)
-(***************************************************************************)
 LEMMA ForfeitPreservesInv ==
     Inv /\ (\E r \in 1..B0 : Forfeit(r)) => Inv'
     <1> SUFFICES ASSUME Inv,
@@ -482,10 +427,6 @@ LEMMA ForfeitPreservesInv ==
     <1>12. QED
         BY <1>6, <1>9, <1>11 DEF Inv
 
-(***************************************************************************)
-(* REFUNDTO PRESERVES INVARIANT                                            *)
-(* Effect: outstandingRefunds -= amount; liveSum += amount.                *)
-(***************************************************************************)
 LEMMA RefundToPreservesInv ==
     Inv /\ (\E amount \in 1..B0 : RefundTo(amount)) => Inv'
     <1> SUFFICES ASSUME Inv,
@@ -533,9 +474,6 @@ LEMMA RefundToPreservesInv ==
     <1>12. QED
         BY <1>6, <1>9, <1>11 DEF Inv
 
-(***************************************************************************)
-(* INV /\ [Next]_vars  =>  Inv'                                            *)
-(***************************************************************************)
 THEOREM InvImpliesNextInv ==
     ASSUME Inv, [Next]_vars
     PROVE  Inv'
@@ -576,10 +514,6 @@ THEOREM InvImpliesNextInv ==
                DEF Next
     <1>3. QED
         BY <1>1, <1>2
-
-(***************************************************************************)
-(* MAIN TEMPORAL THEOREMS                                                  *)
-(***************************************************************************)
 
 THEOREM SpecImpliesInv == Spec => []Inv
     <1>1. Init => Inv

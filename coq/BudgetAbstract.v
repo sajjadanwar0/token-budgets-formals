@@ -1,11 +1,7 @@
-
-
 From Coq Require Import Arith Lia List Bool.
 Import ListNotations.
 
 Set Implicit Arguments.
-
-(** ** State and transitions *)
 
 Record state := {
   liveSum             : nat;
@@ -24,7 +20,6 @@ Definition initial (B0 : nat) : state :=
      totalUnrecoverable := 0;
      totalReleased := 0 |}.
 
-(** The eight transitions, as explicit constructors. *)
 Inductive budget_action : Type :=
 | ASpendSuccess        (r : nat)
 | ASpendInsufficient   (r : nat)
@@ -35,8 +30,6 @@ Inductive budget_action : Type :=
 | AForfeit             (r : nat)
 | ARefundTo            (amount : nat).
 
-(** Transition function: returns [Some s'] if the action is enabled
-    at [s], else [None]. *)
 Definition step (s : state) (a : budget_action) : option state :=
   match a with
   | ASpendSuccess r =>
@@ -104,16 +97,12 @@ Definition step (s : state) (a : budget_action) : option state :=
       else None
   end.
 
-(** ** Reachability via step *)
-
 Inductive reachable (B0 : nat) : state -> Prop :=
 | reach_init : reachable B0 (initial B0)
 | reach_step : forall s a s',
     reachable B0 s ->
     step s a = Some s' ->
     reachable B0 s'.
-
-(** ** Invariants *)
 
 Definition Conservation (B0 : nat) (s : state) : Prop :=
   liveSum s + outstandingReceipts s + outstandingRefunds s
@@ -122,15 +111,11 @@ Definition Conservation (B0 : nat) (s : state) : Prop :=
 Definition CapSoundness (B0 : nat) (s : state) : Prop :=
   totalCharged s <= B0.
 
-(** ** Helper lemmas about Nat.leb / Nat.ltb *)
-
 Lemma leb_true_iff : forall a b, Nat.leb a b = true <-> a <= b.
 Proof. intros; apply Nat.leb_le. Qed.
 
 Lemma ltb_true_iff : forall a b, Nat.ltb a b = true <-> a < b.
 Proof. intros; apply Nat.ltb_lt. Qed.
-
-(** ** Action-by-action preservation lemmas *)
 
 Lemma spend_success_preserves_conservation :
   forall B0 s r s',
@@ -333,8 +318,6 @@ Proof.
   unfold Conservation, CapSoundness in *. simpl in *. split; lia.
 Qed.
 
-(** ** Main theorem: all reachable states satisfy Conservation and CapSoundness *)
-
 Theorem reachable_implies_invariants :
   forall B0 s,
     reachable B0 s ->
@@ -377,7 +360,4 @@ Proof.
       * eapply refund_to_preserves_cap_soundness; eauto.
 Qed.
 
-(** ** Sanity printing *)
-
 Print Assumptions reachable_implies_invariants.
-(** Should print: "Closed under the global context." — i.e., no axioms used. *)

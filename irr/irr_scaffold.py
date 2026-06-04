@@ -1,51 +1,4 @@
-#!/usr/bin/env python3
-"""
-Inter-rater reliability (IRR) scaffold for the failure catalog.
-
-Paper Section 5.6 acknowledges that the 109-row catalog was coded by a
-single rater and that inter-rater reliability statistics are first-class
-targets for the journal extension. This script provides the scaffolding
-to actually carry out IRR coding once a second rater is available:
-
-  1. Stratified random sample selector. Draws a sample of N rows from
-     catalogue.csv stratified by tag (bf, bu, fr, mf) so each
-     class is proportionally represented. Outputs a "coding sheet" CSV
-     with the row's URL and quoted evidence but the original tag and
-     classification redacted, ready for the second rater.
-
-  2. Sample size justification. For two-rater Cohen's kappa with the
-     class distribution observed in our catalog (25/59/6/19 across
-     bf/bu/mf/fr), N=30 is a reasonable lower bound for kappa standard
-     error under 0.10 assuming kappa around 0.80 (Bujang & Baharum 2017;
-     Sim & Wright 2005).
-
-  3. Kappa computation. Once the second rater returns the coded sheet,
-     this script computes Cohen's kappa, weighted kappa for the ordinal
-     resolution-shape categories, per-class agreement rates, and a
-     bootstrapped 95% confidence interval. Prints a summary table the
-     paper §5.6 can quote directly.
-
-  4. Disagreement diagnostics. For any rows where the two raters
-     disagree, this script prints the row's URL, evidence, and both
-     codings side-by-side, so the disagreements can be adjudicated
-     (or recorded as legitimate ambiguity).
-
-Usage:
-    # Step 1: rater A is the original (Sajjad). Generate the sample.
-    python3 irr_scaffold.py sample --n 30 --output coding_sheet.csv
-
-    # Step 2: rater B (independent) fills in the `rater_b_tag` column
-    # of coding_sheet.csv without seeing the original notes column.
-
-    # Step 3: compute kappa from the joint codings.
-    python3 irr_scaffold.py compute --input coding_sheet_completed.csv
-
-    # Step 4: list disagreements for adjudication.
-    python3 irr_scaffold.py disagreements --input coding_sheet_completed.csv
-"""
-
 from __future__ import annotations
-
 import argparse
 import csv
 import json
@@ -67,7 +20,6 @@ TAG_LONG = {
     "mf": "maintainer_framing",
 }
 
-
 @dataclass
 class CatalogRow:
     issue_id: str
@@ -80,20 +32,17 @@ class CatalogRow:
 
 
 def extract_tag(notes: str) -> Optional[str]:
-    """Extract the catalog tag from the notes prefix.
-
-    Notes follow the pattern `paper:bf; ...`, `paper:bu; ...` etc.
-    SKIPPED rows return None."""
     if notes.startswith("SKIPPED"):
         return None
     m = re.match(r"^paper:(bf|bu|fr|mf)\b", notes)
     if m:
         return m.group(1)
-    return None
 
+    return None
 
 def load_catalog(path: Path) -> List[CatalogRow]:
     rows: List[CatalogRow] = []
+
     with path.open() as f:
         for r in csv.DictReader(f):
             tag = extract_tag(r.get("notes", ""))
@@ -106,6 +55,7 @@ def load_catalog(path: Path) -> List[CatalogRow]:
                 notes=r.get("notes", ""),
                 tag=tag,
             ))
+
     return rows
 
 
@@ -114,16 +64,13 @@ def stratified_sample(
     n: int,
     seed: int = 42,
 ) -> List[CatalogRow]:
-    """Draw a stratified random sample by tag class.
-
-    Each class contributes int(p_class * n) rows, where p_class is its
-    proportion in the retained catalog. Remaining slots are filled by
-    largest-residual rounding to reach exactly N."""
     retained = [r for r in rows if r.tag is not None]
+
     if n > len(retained):
         raise ValueError(f"sample size {n} exceeds retained catalog ({len(retained)})")
 
     by_class: Dict[str, List[CatalogRow]] = defaultdict(list)
+
     for r in retained:
         by_class[r.tag].append(r)
 
@@ -142,8 +89,8 @@ def stratified_sample(
             sample.extend(rng.sample(class_rows, whole))
         fractional_remainders.append((proportional - whole, cls))
 
-    # Largest-residual to fill remaining slots
     fractional_remainders.sort(reverse=True)
+
     while len(sample) < n:
         for _, cls in fractional_remainders:
             if len(sample) >= n:
@@ -160,39 +107,19 @@ def stratified_sample(
 
     return sample
 
-
 def write_coding_sheet(sample: List[CatalogRow], output: Path,
                        blind: bool = False) -> None:
-    """Write a redacted coding sheet for the second rater.
-
-    Two redaction modes:
-
-    Default (notes preserved with tag stripped). The leading
-    `paper:(bf|bu|fr|mf)` tag is stripped from each row's notes; the
-    rest of rater A's evidence summary is preserved. The kappa this
-    produces is "agreement under shared analysis" -- weaker than blind
-    IRR but practical at N=30.
-
-    Blind (notes stripped entirely, --blind). The notes_redacted column
-    is left empty; rater B must read the GitHub URL directly to code
-    each row. Stronger IRR but takes ~3 min/issue.
-
-    Either way, the rater_b_tag column is left blank for the second
-    rater to fill in."""
     with output.open("w", newline="") as f:
         w = csv.writer(f)
         w.writerow([
             "issue_id", "framework", "date", "short_url", "title",
             "notes_redacted", "rater_a_tag", "rater_b_tag",
         ])
+
         for r in sample:
             if blind:
                 redacted = ""
             else:
-                # Strip leading tag in any of the catalog's actual forms:
-                # `paper:bf; ...`, `paper:bf with ...`, `paper:bf. ...`,
-                # `paper:bf ...`. Anchor at start, allow optional separator
-                # (semicolon, period, comma) and any whitespace.
                 redacted = re.sub(
                     r"^paper:(bf|bu|fr|mf)\b[;.,\s]*",
                     "",
@@ -200,7 +127,7 @@ def write_coding_sheet(sample: List[CatalogRow], output: Path,
                 )
             w.writerow([
                 r.issue_id, r.framework, r.date, r.short_url, r.title,
-                redacted, r.tag, "",  # rater_b_tag is blank
+                redacted, r.tag, "",
             ])
 
 
@@ -209,32 +136,28 @@ def cohen_kappa(
     rater_b: List[str],
     classes: List[str],
 ) -> Tuple[float, Dict[str, float]]:
-    """Compute Cohen's kappa for two raters on the given class set.
-
-    Returns (kappa, per-class agreement rate)."""
     n = len(rater_a)
+
     assert n == len(rater_b)
 
-    # Observed agreement
     observed_agree = sum(1 for a, b in zip(rater_a, rater_b) if a == b)
     p_o = observed_agree / n
 
-    # Expected agreement by chance
     a_count = Counter(rater_a)
     b_count = Counter(rater_b)
+
     p_e = sum(
         (a_count[c] / n) * (b_count[c] / n)
         for c in classes
     )
 
     if p_e == 1.0:
-        # All raters always agree on one class; kappa undefined
         kappa = 1.0 if p_o == 1.0 else 0.0
     else:
         kappa = (p_o - p_e) / (1 - p_e)
 
-    # Per-class agreement (sensitivity for each tag)
     per_class: Dict[str, float] = {}
+
     for c in classes:
         a_n = sum(1 for a in rater_a if a == c)
         agree_in_c = sum(
@@ -244,7 +167,6 @@ def cohen_kappa(
 
     return kappa, per_class
 
-
 def bootstrap_kappa_ci(
     rater_a: List[str],
     rater_b: List[str],
@@ -252,10 +174,10 @@ def bootstrap_kappa_ci(
     n_bootstrap: int = 2000,
     seed: int = 42,
 ) -> Tuple[float, float]:
-    """Bootstrap a 95% CI on Cohen's kappa."""
     rng = random.Random(seed)
     n = len(rater_a)
     boots: List[float] = []
+
     for _ in range(n_bootstrap):
         idx = [rng.randrange(n) for _ in range(n)]
         a_boot = [rater_a[i] for i in idx]
@@ -266,10 +188,12 @@ def bootstrap_kappa_ci(
         except Exception:
             continue
     boots.sort()
+
     if len(boots) < 100:
         return float("nan"), float("nan")
     lo = boots[int(0.025 * len(boots))]
     hi = boots[int(0.975 * len(boots))]
+
     return lo, hi
 
 
@@ -278,21 +202,24 @@ def cmd_sample(args: argparse.Namespace) -> int:
     sample = stratified_sample(rows, args.n, seed=args.seed)
     write_coding_sheet(sample, args.output, blind=args.blind)
 
-    # Distribution check
     seen = Counter(r.tag for r in sample)
+
     print(f"Stratified sample of N={args.n} rows written to {args.output}")
+
     if args.blind:
         print(f"Mode: BLIND (notes_redacted column is empty; rater B reads "
               f"GitHub URL directly)")
     else:
         print(f"Mode: standard (leading paper: tag stripped, evidence preserved)")
     print(f"Distribution by tag (rater A original):")
+
     for tag in TAG_CLASSES:
         n = seen.get(tag, 0)
         print(f"  {TAG_LONG[tag]:<24}: {n}")
     print()
     print(f"Instructions for rater B:")
     print(f"  1. Open {args.output} (do NOT look at the rater_a_tag column)")
+
     if args.blind:
         print(f"  2. For each row, visit short_url in a browser and read the "
               f"full GitHub")
@@ -313,8 +240,8 @@ def cmd_sample(args: argparse.Namespace) -> int:
     print(f"          the broader pattern)")
     print(f"  4. Fill in the rater_b_tag column. Save as a new file.")
     print(f"  5. Hand the completed file back; run `irr_scaffold.py compute`.")
-    return 0
 
+    return 0
 
 def cmd_compute(args: argparse.Namespace) -> int:
     rows: List[Dict[str, str]] = []
@@ -329,8 +256,8 @@ def cmd_compute(args: argparse.Namespace) -> int:
     if blanks > 0:
         sys.stderr.write(f"WARNING: {blanks} rows have an empty rater_b_tag\n")
 
-    # Drop rows where either is blank or invalid
     paired: List[Tuple[str, str]] = []
+
     for a, b in zip(a_tags, b_tags):
         if a in TAG_CLASSES and b in TAG_CLASSES:
             paired.append((a, b))
@@ -364,7 +291,6 @@ def cmd_compute(args: argparse.Namespace) -> int:
     print(f"  Bootstrap 95% CI:      [{ci_lo:.3f}, {ci_hi:.3f}]")
     print()
 
-    # Landis & Koch (1977) interpretation, with the standard caveats:
     if kappa < 0:
         interp = "less than chance agreement"
     elif kappa < 0.20:
@@ -383,12 +309,12 @@ def cmd_compute(args: argparse.Namespace) -> int:
     print()
 
     print(f"Per-class agreement rate (rater A's coding as reference):")
+
     for tag in TAG_CLASSES:
         rate = per_class.get(tag, float("nan"))
         print(f"  {TAG_LONG[tag]:<24}: {rate:.3f}")
 
     return 0
-
 
 def cmd_disagreements(args: argparse.Namespace) -> int:
     rows: List[Dict[str, str]] = []
@@ -414,7 +340,6 @@ def cmd_disagreements(args: argparse.Namespace) -> int:
             print(f"    {line}")
         print()
     return 0
-
 
 def main() -> int:
     p = argparse.ArgumentParser(
@@ -454,7 +379,6 @@ def main() -> int:
 
     args = p.parse_args()
     return args.func(args)
-
 
 if __name__ == "__main__":
     sys.exit(main())

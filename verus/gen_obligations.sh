@@ -1,31 +1,7 @@
 #!/usr/bin/env bash
-# gen_obligations.sh — generate OBLIGATIONS.md from Verus source files.
-#
-# Reads the three Verus modules listed in reproduce.sh, extracts every
-# function declaration carrying `requires` and/or `ensures` clauses,
-# and writes a markdown index that a reviewer can read alongside the
-# paper's claim of "66 obligations across three modules".
-#
-# Run from the verus/ crate root (the directory containing src/ and
-# Cargo.toml). Per-module counts in OBLIGATIONS.md are pulled directly
-# from verus-{lib,pool,concurrent}.log so the markdown agrees with the
-# Verus tool's own count — no manual arithmetic.
-#
-# Output: OBLIGATIONS.md (overwrites if present).
-# Exit codes:
-#   0  success (file written)
-#   1  missing source file or log
-#   2  total count != 66 (paper-vs-reality drift signal)
-#
-# Usage:
-#   bash gen_obligations.sh
-#
-# Or call from reproduce.sh after the Verus step:
-#   (cd token-budgets-formals/verus && bash gen_obligations.sh)
 
 set -euo pipefail
 
-# Dependency check: this script uses gawk extensions (match with array).
 if ! command -v gawk >/dev/null 2>&1; then
   echo "ERROR: gawk required (apt install gawk; brew install gawk)" >&2
   exit 1
@@ -38,7 +14,6 @@ OUT="OBLIGATIONS.md"
 SRC_DIR="src"
 MODULES=(lib pool concurrent)
 
-# -------- 1. Sanity-check: source files and logs exist --------
 missing=0
 for m in "${MODULES[@]}"; do
   [[ -f "$SRC_DIR/$m.rs" ]] || { echo "MISSING: $SRC_DIR/$m.rs" >&2; missing=1; }
@@ -46,7 +21,6 @@ for m in "${MODULES[@]}"; do
 done
 [[ $missing -eq 0 ]] || exit 1
 
-# -------- 2. Pull per-module obligation counts straight from logs --------
 declare -A COUNT
 for m in "${MODULES[@]}"; do
   COUNT[$m]=$(grep -oE "[0-9]+ verified" "verus-$m.log" \
@@ -54,27 +28,9 @@ for m in "${MODULES[@]}"; do
 done
 TOTAL=$(( COUNT[lib] + COUNT[pool] + COUNT[concurrent] ))
 
-# -------- 3. Extract pub fn / proof fn / spec fn declarations --------
-# An "obligation-bearing function" in Verus is one with at least one
-# `requires` or `ensures` clause. We extract function NAME plus its
-# clause keywords (requires/ensures/recommends) for each module. This
-# is a structural index — for the exact predicates, read the source.
-#
-# Parsing rules (deliberately conservative):
-#   - State machine: track whether we're inside a function signature
-#     (between `fn` line and opening `{`).
-#   - Function start: a line containing `fn NAME` where NAME is captured
-#     greedily before `(` or `<`. Visibility (`pub`, `pub(crate)`) and
-#     keywords (`spec`, `proof`, `exec`) are recorded if present.
-#   - Inside signature: scan for `requires`, `ensures`, `recommends`
-#     keywords (as whole words).
-#   - Function end: opening `{` at top of body (preceded by no `=`
-#     to skip type inference cases).
 extract_obligations() {
   local file="$1"
-  # Use gawk explicitly: relies on the match(string, regex, array) form
-  # which is a GNU extension. gawk is universal on Linux; the
-  # reproduce.sh harness already requires GNU tooling.
+
   gawk '
     BEGIN {
       in_sig = 0
@@ -120,7 +76,6 @@ extract_obligations() {
   ' "$file"
 }
 
-# -------- 4. Write OBLIGATIONS.md --------
 cat > "$OUT" <<EOF
 # Verus Obligations — Token Budgets
 
@@ -196,7 +151,6 @@ result inherits these assumptions. See the paper's
 not-verified items.
 EOF
 
-# -------- 5. Sanity check: paper-vs-reality drift --------
 echo "Wrote $OUT (total: $TOTAL obligations)"
 if [[ "$TOTAL" -ne 66 ]]; then
   echo "WARNING: total $TOTAL != 66 (paper claim). Update paper or check Verus output." >&2

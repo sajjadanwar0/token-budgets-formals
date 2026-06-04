@@ -6,6 +6,7 @@ import hashlib
 import random
 import sys
 from pathlib import Path
+import json
 
 CJK_FRAGMENTS = [
     "你好世界，这是一个测试。这是关于异步并发的复杂讨论。",
@@ -63,14 +64,7 @@ RTL_FRAGMENTS = [
     "Mixing English with עברית and العربية within a single sentence stresses tokenizers.",
 ]
 
-
 def nested_json_schema(depth: int, rng: random.Random) -> str:
-    """Generate a nested JSON tool schema for the prereg corpus.
-
-    Width is fixed at 2 fields per level to avoid combinatorial explosion
-    while preserving the adversarial nested-structure property of real-world
-    LLM tool schemas (typically depth 3-6, width 2-5).
-    """
     def build(d: int) -> dict:
         if d == 0:
             return {
@@ -78,7 +72,7 @@ def nested_json_schema(depth: int, rng: random.Random) -> str:
                 "description": f"leaf at depth {d}",
                 "enum": [f"val_{i}" for i in range(rng.randint(3, 5))],
             }
-        # Width: 2 fields per level (deterministic, avoids exponential blowup)
+
         return {
             "type": "object",
             "properties": {
@@ -90,20 +84,14 @@ def nested_json_schema(depth: int, rng: random.Random) -> str:
                            f"(seed-stable expansion)",
         }
 
-    import json
     schema = build(depth)
     return json.dumps(schema, ensure_ascii=False)
 
-
-# ---------------------------- Generation ----------------------------
-
 def generate_corpus(seed: int = 42) -> list[dict]:
-    """Generate the 100-prompt adversarial corpus deterministically."""
     rng = random.Random(seed)
     rows: list[dict] = []
     pid = 0
 
-    # Dimension 1: CJK-heavy Unicode (15 prompts)
     for i in range(15):
         text = " ".join(rng.sample(CJK_FRAGMENTS, k=min(3, len(CJK_FRAGMENTS))))
         rows.append({
@@ -114,7 +102,6 @@ def generate_corpus(seed: int = 42) -> list[dict]:
         })
         pid += 1
 
-    # Dimension 2: Source-code multi-line (10 prompts)
     for i in range(10):
         text = "\n\n".join(rng.sample(CODE_FRAGMENTS, k=min(2, len(CODE_FRAGMENTS))))
         rows.append({
@@ -125,7 +112,6 @@ def generate_corpus(seed: int = 42) -> list[dict]:
         })
         pid += 1
 
-    # Dimension 3: Mathematical Unicode (10 prompts)
     for i in range(10):
         text = " ".join(rng.sample(MATH_FRAGMENTS, k=min(3, len(MATH_FRAGMENTS))))
         rows.append({
@@ -136,7 +122,6 @@ def generate_corpus(seed: int = 42) -> list[dict]:
         })
         pid += 1
 
-    # Dimension 4: Base64-dense payloads (15 prompts)
     for i in range(15):
         text = " then ".join(rng.sample(BASE64_FRAGMENTS, k=min(2, len(BASE64_FRAGMENTS))))
         rows.append({
@@ -147,7 +132,6 @@ def generate_corpus(seed: int = 42) -> list[dict]:
         })
         pid += 1
 
-    # Dimension 5: Mixed-script context (10 prompts)
     for i in range(10):
         text = " ".join(rng.sample(MIXED_SCRIPT_FRAGMENTS, k=min(2, len(MIXED_SCRIPT_FRAGMENTS))))
         rows.append({
@@ -158,7 +142,6 @@ def generate_corpus(seed: int = 42) -> list[dict]:
         })
         pid += 1
 
-    # Dimension 6: RTL Hebrew/Arabic (10 prompts)
     for i in range(10):
         text = " ".join(rng.sample(RTL_FRAGMENTS, k=min(2, len(RTL_FRAGMENTS))))
         rows.append({
@@ -169,11 +152,9 @@ def generate_corpus(seed: int = 42) -> list[dict]:
         })
         pid += 1
 
-    # Dimension 7: Deeply nested JSON tool schemas (30 prompts: 10 per depth × 3 of 4 depths)
     for depth in [4, 6, 8, 10]:
-        n_per = 30 // 4 if depth != 10 else 30 - 3 * (30 // 4)
-        # Actually distribute 10/10/5/5
         n_per = {4: 10, 6: 10, 8: 5, 10: 5}[depth]
+
         for i in range(n_per):
             text = nested_json_schema(depth, rng)
             rows.append({
@@ -185,7 +166,6 @@ def generate_corpus(seed: int = 42) -> list[dict]:
             pid += 1
 
     return rows
-
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -199,14 +179,12 @@ def main() -> int:
     corpus = generate_corpus(args.seed)
     print(f"Generated {len(corpus)} prompts", file=sys.stderr)
 
-    # Write CSV
     with args.output.open("w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=["prompt_id", "category", "depth", "prompt"])
         writer.writeheader()
         for row in corpus:
             writer.writerow(row)
 
-    # Compute SHA-256 for the pre-registration record
     csv_bytes = args.output.read_bytes()
     csv_sha = hashlib.sha256(csv_bytes).hexdigest()
     script_sha = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
@@ -222,7 +200,6 @@ def main() -> int:
     print("  git push origin prereg-v1")
 
     return 0
-
 
 if __name__ == "__main__":
     raise SystemExit(main())

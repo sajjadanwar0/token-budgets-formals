@@ -375,10 +375,10 @@ Qed.
 
     All Admitted obligations from the original BudgetIris.v
     "session" machinery are now discharged in pure Coq:
-    - exec_op_sum_charged    : ✓ proved
-    - exec_trace_sum_charged : ✓ proved
-    - linear_trace_cap_soundness : ✓ proved (headline)
-    - abstract_state_initial : ✓ proved
+    - exec_op_sum_charged    : proved
+    - exec_trace_sum_charged :  proved
+    - linear_trace_cap_soundness :  proved (headline)
+    - abstract_state_initial :  proved
 
     [Print Assumptions linear_trace_cap_soundness] should report
     "Closed under the global context" — no axioms used.
