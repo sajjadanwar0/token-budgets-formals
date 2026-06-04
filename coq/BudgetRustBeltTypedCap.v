@@ -12,7 +12,7 @@ Set Default Proof Using "Type".
 Section budget_rustbelt_typed_cap.
 Context `{!typeGS Σ}.
 
-Definition A2_bound : Z := 9223372036854775808%Z.   (* = 2^63 *)
+Definition A2_bound : Z := 9223372036854775808%Z.
 
 Lemma A2_bound_eq : A2_bound = (2 ^ 63)%Z.
 Proof. unfold A2_bound. lia. Qed.

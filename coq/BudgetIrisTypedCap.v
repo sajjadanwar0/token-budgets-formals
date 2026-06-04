@@ -9,6 +9,8 @@ Set Default Proof Using "Type".
 Section budget_iris_typed_cap.
 Context `{!heapGS Σ}.
 
+Definition A2_bound : Z := 9223372036854775808%Z.
+
 Lemma A2_bound_eq : A2_bound = (2 ^ 63)%Z.
 Proof. unfold A2_bound. lia. Qed.
 
@@ -38,12 +40,12 @@ Proof.
   iDestruct "Hc" as "(Hl & %Hv & %HA2)".
   iApply (wp_spend with "Hl").
   iIntros "!>" (success l') "[Hsucc | Hfail]".
-  - (* success branch *)
+  -
     iDestruct "Hsucc" as "(%Hs & %Hrv & Hl' & %Hl'eq)".
     iApply ("HΦ" $! success l').
     iLeft. iFrame "Hl'". iPureIntro.
     split_and!; (assumption || lia).
-  - (* failure branch *)
+  -
     iDestruct "Hfail" as "(%Hs & %Hvr & Hl)".
     iApply ("HΦ" $! success l').
     iRight. iFrame "Hl". iPureIntro.

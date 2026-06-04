@@ -29,13 +29,13 @@ Proof.
   iDestruct "Hc" as "(Hl & %Hv & %HA2)".
   iApply (wp_spend with "Hl").
   iIntros "!>" (success l') "[Hsucc | Hfail]".
-  - (* success: new value is v - r ∈ [0, MAX] *)
+  -
     iDestruct "Hsucc" as "(%Hs & %Hrv & Hl' & %Hl'eq)".
     iApply ("HΦ" $! success l' (v - r)%Z).
     iSplitR; [iPureIntro; lia|].
     iLeft. iFrame "Hl'". iPureIntro.
     split_and!; (assumption || lia).
-  - (* failure: value unchanged, still v ∈ [0, MAX] *)
+  -
     iDestruct "Hfail" as "(%Hs & %Hvr & Hl)".
     iApply ("HΦ" $! success l' v).
     iSplitR; [iPureIntro; lia|].

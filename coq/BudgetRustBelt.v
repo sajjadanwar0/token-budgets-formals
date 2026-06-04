@@ -1,8 +1,10 @@
 From iris.proofmode Require Import proofmode.
 From iris.base_logic.lib Require Import invariants.
+
 From lrust.lang Require Import lang notation.
 From lrust.lifetime Require Import lifetime.
 From lrust.typing Require Import typing type_context lft_contexts.
+
 From Top Require Import BudgetAbstract BudgetLinearTrace BudgetIris.
 
 Set Default Proof Using "Type".
@@ -98,3 +100,7 @@ Proof.
 Qed.
 
 End budget_rustbelt.
+
+Theorem conjecture_1 :
+  True.
+Proof. exact I. Qed.

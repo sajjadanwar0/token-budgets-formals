@@ -19,7 +19,10 @@ Lemma budget_inv_excl l v v' :
   budget_inv l v -∗ budget_inv l v' -∗ False.
 Proof.
   iIntros "H1 H2".
-  iDestruct (pointsto_ne with "H1 H2") as %Hne.
+
+  first
+    [ iDestruct (pointsto_ne with "H1 H2") as %Hne
+    | iDestruct (mapsto_ne  with "H1 H2") as %Hne ].
   done.
 Qed.
 
@@ -27,9 +30,7 @@ Definition spend_fn : val :=
   λ: "b" "r",
     let: "v" := !"b" in
     if: "v" < "r" then
-      (* Insufficient: do not deduct. Return original pointer with
-         success=false so the postcondition values line up in both
-         branches (l' = l). *)
+
       (#false, "b")
     else
       "b" <- ("v" - "r");;
@@ -39,7 +40,7 @@ Definition split_fn : val :=
   λ: "b" "a",
     let: "v" := !"b" in
     if: "v" < "a" then
-      (* Failure: return original pointer twice as dummies. *)
+
       (#false, "b", "b")
     else
       "b" <- ("v" - "a");;
@@ -53,9 +54,6 @@ Definition merge_fn : val :=
     let: "v2" := !"b2" in
     "b1" <- ("v1" + "v2");;
     "b1".
-    (* In real Rust, b2 would be dropped here. heap_lang lacks
-       linear typing so we model the drop implicitly by never
-       referring to b2 again. *)
 
 Definition consume_fn : val :=
   λ: "b",
@@ -76,12 +74,12 @@ Proof.
   wp_load.
   wp_pures.
   destruct (decide (v < r)%Z) as [Hlt | Hge].
-  - (* Insufficient branch *)
+  -
     rewrite bool_decide_true; [|lia].
     wp_pures.
     iApply ("HΦ" $! false l).
     iRight. iFrame "Hl". iPureIntro. split_and!; [done|lia].
-  - (* Sufficient branch *)
+  -
     rewrite bool_decide_false; [|lia].
     wp_pures.
     wp_store.
@@ -119,8 +117,6 @@ Proof.
     iLeft. iFrame "Hl Hchild". iPureIntro. split_and!; [done|lia|done].
 Qed.
 
-(** ** Hoare triple for merge *)
-
 Lemma wp_merge (l1 l2 : loc) (v1 v2 : Z) :
   {{{ budget_inv l1 v1 ∗ budget_inv l2 v2 }}}
     merge_fn #l1 #l2
@@ -136,8 +132,6 @@ Proof.
   wp_store.
   iApply "HΦ". by iFrame.
 Qed.
-
-(** ** Hoare triple for consume *)
 
 Lemma wp_consume (l : loc) (v : Z) :
   {{{ budget_inv l v }}}

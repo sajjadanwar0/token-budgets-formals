@@ -4,7 +4,7 @@ Open Scope Z_scope.
 
 Definition uc := Z.
 
-Definition A2_bound : Z := 9223372036854775808.   (* = 2^63 *)
+Definition A2_bound : Z := 9223372036854775808.
 
 Lemma A2_bound_eq : A2_bound = 2 ^ 63.
 Proof. unfold A2_bound. lia. Qed.
@@ -20,7 +20,6 @@ Definition sum_live (s : state) : uc :=
 Definition total (s : state) : uc :=
   sum_live s + committed s.
 
-(* Initial state for a Budget<MAX>::new(MAX). *)
 Definition init (MAX : uc) : state :=
   mkState [MAX] 0.
 
@@ -171,7 +170,7 @@ Qed.
 Lemma step_invariant : forall MAX s o,
   invariant MAX s -> invariant MAX (step MAX s o).
 Proof.
-  intros MAX [livel commit] o HI. (* destruct s upfront *)
+  intros MAX [livel commit] o HI.
   destruct HI as [HT [HC HF]].
   unfold invariant, total, sum_live in HT, HC, HF.
   simpl in HT, HC, HF.
@@ -236,9 +235,7 @@ Proof.
         rewrite (Nat.max_l _ _ Hge).
         rewrite (Nat.min_r _ _ Hge).
         pose proof (sum_remove_two _ _ _ _ _ Hgt Hnj Hni) as Hsr.
-        (* Goal: fold_right ... = L - vi - vj.
-           Hsr says the same fold_right = L - vj - vi.
-           Chain by transitivity, then lia handles the commutativity. *)
+
         transitivity (fold_right Z.add 0 livel - vj - vi).
         + exact Hsr.
         + lia. }
@@ -253,7 +250,6 @@ Proof.
     + simpl in Hvi, Hvj.
       constructor; [lia | apply forall_remove_at_twice; assumption].
 Qed.
-
 
 Lemma reachable_invariant : forall MAX s,
   0 <= MAX -> reachable MAX s -> invariant MAX s.

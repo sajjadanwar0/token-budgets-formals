@@ -1,12 +1,35 @@
--Q . Top
--Q /home/neo/lambda-rust/lifetime lrust.lifetime
--Q /home/neo/lambda-rust/lambda-rust/lang lrust.lang
--Q /home/neo/lambda-rust/lambda-rust/typing lrust.typing
--arg -w -arg -notation-overridden
--arg -w -arg -redundant-canonical-projection
+# Single source of truth for logical paths and source files.
+#
+# Iris / stdpp are found automatically in Coq's user-contrib (apt
+# package libcoq-iris, or opam coq-iris). lambda-rust is NOT listed
+# here with an absolute -Q path because that is machine-specific; the
+# Makefile injects the lambda-rust paths from $(LRUST_BASE) for the
+# three Tier-C files that need them. For IDE use of the Tier-C files,
+# either install lambda-rust via opam (lands in user-contrib) or set
+# COQPATH to your lambda-rust checkout.
+#
+# NOTE: The Makefile in this directory is hand-written. Do NOT run
+# `coq_makefile -f _CoqProject -o Makefile`; it would overwrite the
+# Makefile and drop the lambda-rust path handling.
 
+-Q . Top
+-arg -w -arg -notation-overridden
+-arg -w -arg -masking-absolute-name
+
+# --- Pure Coq (Coq stdlib only) ---
+BudgetAbstract.v
+BudgetLinearTrace.v
 BudgetTypedCap.v
-BudgetIrisTypedCap.v
-BudgetRustBeltTypedCap.v
 BudgetTraceRefinementPure.v
+
+# --- Tier B (needs Iris) ---
+BudgetIris.v
+BudgetIrisTypedCap.v
 BudgetTraceRefinement.v
+
+# --- Tier C (needs Iris + lambda-rust) ---
+BudgetRustBelt.v
+BudgetRustBeltTypedCap.v
+
+# --- Assumptions audit (Print Assumptions; needs Tier C) ---
+VerifyAssumptions.v

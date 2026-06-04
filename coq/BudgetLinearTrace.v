@@ -1,47 +1,20 @@
-(** * BudgetLinearTrace.v
-
-    A pure-Coq formalization of "linear traces" of Budget operations:
-    sequences of spend/split/merge/consume operations that respect the
-    affine ownership discipline.
-
-    This file factors the previously-Admitted "session" obligations of
-    BudgetIris.v into pure Coq, so they can be discharged without
-    Iris. The Iris layer (BudgetIris.v) then merely connects each
-    operation to its heap-state effect via a Hoare triple.
-
-    Status: complete, no Admitted, no axioms beyond Coq stdlib.
-    Compile with: coqc -Q . Top BudgetLinearTrace.v
-*)
-
 From Coq Require Import Arith Lia List Bool.
 Import ListNotations.
 
 From Top Require Import BudgetAbstract.
 
-(** ** Linear (affine) state and operations *)
-
-(** A [linear_state] is a list of (budget_id, value) pairs. Each
-    budget_id is a [nat] uniquely identifying a Budget instance.
-    The state is finite and ordered; affineness is enforced by the
-    [well_formed] predicate below. *)
-
 Definition budget_id := nat.
 Definition linear_state := list (budget_id * nat).
 
-(** The four spend-path operations. Receipt-path operations are out
-    of scope here; they are handled separately in BudgetIris.v. *)
 Inductive op : Type :=
-| OpSpend   : budget_id -> nat -> op             (** spend r from b *)
-| OpSplit   : budget_id -> budget_id -> nat -> op (** split b into b (remainder) and fresh b' with value a *)
-| OpMerge   : budget_id -> budget_id -> op       (** merge b1 and b2 into b1 *)
-| OpConsume : budget_id -> op.                    (** consume b *)
+| OpSpend   : budget_id -> nat -> op
+| OpSplit   : budget_id -> budget_id -> nat -> op
+| OpMerge   : budget_id -> budget_id -> op
+| OpConsume : budget_id -> op.
 
-(** [sum_of] : the live sum (matches the abstract liveSum). *)
 Definition sum_of (s : linear_state) : nat :=
   fold_right (fun bv acc => snd bv + acc) 0 s.
 
-(** [lookup b s] : the value of budget [b] in state [s], or [None]
-    if [b] is not live. *)
 Fixpoint lookup (b : budget_id) (s : linear_state) : option nat :=
   match s with
   | [] => None
@@ -49,7 +22,6 @@ Fixpoint lookup (b : budget_id) (s : linear_state) : option nat :=
       if Nat.eqb b b' then Some v else lookup b rest
   end.
 
-(** [update b v s] : replace the entry for [b] in [s] with value [v]. *)
 Fixpoint update (b : budget_id) (v : nat) (s : linear_state) : linear_state :=
   match s with
   | [] => []
@@ -57,7 +29,6 @@ Fixpoint update (b : budget_id) (v : nat) (s : linear_state) : linear_state :=
       if Nat.eqb b b' then (b', v) :: rest else (b', v') :: update b v rest
   end.
 
-(** [remove b s] : drop the entry for [b] from [s]. *)
 Fixpoint remove_id (b : budget_id) (s : linear_state) : linear_state :=
   match s with
   | [] => []
@@ -65,14 +36,8 @@ Fixpoint remove_id (b : budget_id) (s : linear_state) : linear_state :=
       if Nat.eqb b b' then rest else (b', v') :: remove_id b rest
   end.
 
-(** [fresh b s] : [b] is not currently live in [s]. *)
 Definition fresh (b : budget_id) (s : linear_state) : Prop :=
   lookup b s = None.
-
-(** Step function for one operation. Returns [None] if the operation
-    is not enabled (e.g., spending more than available, splitting more
-    than available, merging non-existent budgets, splitting onto a
-    non-fresh location). *)
 
 Definition exec_op (s : linear_state) (o : op) : option linear_state :=
   match o with
@@ -88,7 +53,7 @@ Definition exec_op (s : linear_state) (o : op) : option linear_state :=
         | Some v =>
             if Nat.leb a v then
               match lookup b' s with
-              | Some _ => None (** b' must be fresh *)
+              | Some _ => None
               | None => Some ((b', a) :: update b (v - a) s)
               end
             else None
@@ -108,8 +73,6 @@ Definition exec_op (s : linear_state) (o : op) : option linear_state :=
       end
   end.
 
-(** [exec_trace s ops] : execute a sequence of operations, returning
-    [Some s_final] if all succeed, else [None]. *)
 Fixpoint exec_trace (s : linear_state) (ops : list op) : option linear_state :=
   match ops with
   | [] => Some s
@@ -120,11 +83,6 @@ Fixpoint exec_trace (s : linear_state) (ops : list op) : option linear_state :=
       end
   end.
 
-(** ** The total_charged ghost variable *)
-
-(** [charged_of] : the total cost charged across a trace. We compute
-    it from the trace + initial state rather than threading it through
-    the state, to keep [linear_state] pure. *)
 Fixpoint charged_of (s : linear_state) (ops : list op) : nat :=
   match ops with
   | [] => 0
@@ -162,8 +120,6 @@ Fixpoint charged_of (s : linear_state) (ops : list op) : nat :=
       end
   end.
 
-(** ** Helper lemmas about sum_of, update, and remove_id *)
-
 Lemma lookup_in : forall b v s,
     lookup b s = Some v -> In (b, v) s.
 Proof.
@@ -184,8 +140,6 @@ Proof.
     + apply IH in H. lia.
 Qed.
 
-(** If two distinct budget_ids both look up to values, their sum is
-    bounded by the total sum. This is needed for OpMerge soundness. *)
 Lemma two_lookup_sum_le :
   forall b1 v1 b2 v2 s,
     b1 <> b2 ->
@@ -238,19 +192,12 @@ Proof.
       lia.
 Qed.
 
-(** ** Sum + charged conservation lemma *)
-
-(** The correct invariant: for any state [s] and remaining ops [ops],
-    if execution succeeds with final state [s_final], then
-    [sum_of s = sum_of s_final + charged_of s ops]. That is, the
-    initial sum equals the final sum plus all charges incurred. *)
-
 Lemma exec_op_sum_charged : forall s o s' ops,
     exec_op s o = Some s' ->
     sum_of s + charged_of s' ops = sum_of s' + charged_of s (o :: ops).
 Proof.
   intros s [b r | b b' a | b1 b2 | b] s' ops H.
-  - (* OpSpend *)
+  -
     cbn in H.
     destruct (lookup b s) as [v|] eqn:Hb; [|discriminate].
     destruct (Nat.leb r v) eqn:Hle_b; [|discriminate].
@@ -260,7 +207,7 @@ Proof.
     pose proof (lookup_le_sum b v s Hb) as Hsub.
     rewrite (update_sum b v (v - r) s Hb).
     lia.
-  - (* OpSplit *)
+  -
     cbn in H.
     destruct (Nat.eqb b b') eqn:Heq; [discriminate|].
     destruct (lookup b s) as [v|] eqn:Hb; [|discriminate].
@@ -273,7 +220,7 @@ Proof.
     fold (sum_of (update b (v - a) s)).
     rewrite (update_sum b v (v - a) s Hb).
     cbn. lia.
-  - (* OpMerge *)
+  -
     cbn in H.
     destruct (Nat.eqb b1 b2) eqn:Heq; [discriminate|].
     destruct (lookup b1 s) as [v1|] eqn:Hb1; [|discriminate].
@@ -300,7 +247,7 @@ Proof.
     pose proof (two_lookup_sum_le b1 v1 b2 v2 s Hneq Hb1 Hb2) as Hsum_both.
     rewrite (remove_id_sum b2 v2 s Hb2).
     lia.
-  - (* OpConsume *)
+  -
     cbn in H.
     destruct (lookup b s) as [v|] eqn:Hb; [|discriminate].
     inversion H; subst.
@@ -310,7 +257,6 @@ Proof.
     lia.
 Qed.
 
-(** Trace-level: sum + total_charged is invariant. *)
 Lemma exec_trace_sum_charged : forall ops s s',
     exec_trace s ops = Some s' ->
     sum_of s = sum_of s' + charged_of s ops.
@@ -321,13 +267,9 @@ Proof.
     destruct (exec_op s o) as [s_mid|] eqn:Hop; [|discriminate].
     pose proof (exec_op_sum_charged _ _ _ rest Hop) as Hstep.
     apply IH in H.
-    (* H : sum_of s_mid = sum_of s' + charged_of s_mid rest *)
-    (* Hstep : sum_of s + charged_of s_mid rest = sum_of s_mid + charged_of s (o :: rest) *)
-    (* Goal: sum_of s = sum_of s' + charged_of s (o :: rest) *)
+
     lia.
 Qed.
-
-(** ** The headline theorem: linear-trace cap soundness *)
 
 Definition initial_linear_state (B0 : nat) : linear_state := [(0, B0)].
 
@@ -339,23 +281,10 @@ Proof.
   intros B0 ops s_final H.
   pose proof (exec_trace_sum_charged _ _ _ H) as Hsum.
   unfold initial_linear_state in *. cbn in Hsum.
-  (* Hsum : B0 + 0 = sum_of s_final + charged_of [(0, B0)] ops *)
-  (* So B0 = sum_of s_final + charged_of [(0, B0)] ops. *)
-  (* Since sum_of s_final >= 0, we get charged_of <= B0. *)
+
   lia.
 Qed.
 
-(** ** Bridge to BudgetAbstract.reachable *)
-
-(** Each linear-trace operation corresponds to a sequence of abstract
-    state machine transitions. Specifically:
-    - OpSpend r : ASpendSuccess r
-    - OpSplit b b' a : no abstract change (split preserves liveSum)
-    - OpMerge b1 b2 : no abstract change (merge preserves liveSum)
-    - OpConsume b : AConsume (with the consumed liveSum going to totalReleased) *)
-
-(** [abstract_state_of B0 s ops] : the abstract state after executing
-    [ops] from initial state derived from [s]. *)
 Definition abstract_state_of (B0 : nat) (s : linear_state) (charged : nat) : state :=
   {| liveSum := sum_of s;
      outstandingReceipts := 0;
@@ -370,18 +299,5 @@ Proof.
   intros B0. unfold abstract_state_of, initial_linear_state, initial.
   cbn. f_equal; lia.
 Qed.
-
-(** ** Status
-
-    All Admitted obligations from the original BudgetIris.v
-    "session" machinery are now discharged in pure Coq:
-    - exec_op_sum_charged    : proved
-    - exec_trace_sum_charged :  proved
-    - linear_trace_cap_soundness :  proved (headline)
-    - abstract_state_initial :  proved
-
-    [Print Assumptions linear_trace_cap_soundness] should report
-    "Closed under the global context" — no axioms used.
-*)
 
 Print Assumptions linear_trace_cap_soundness.

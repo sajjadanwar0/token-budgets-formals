@@ -5,11 +5,6 @@ From lrust.typing Require Import own type_context.
 Section budget_placeholder.
   Context `{!typeGS Σ}.
 
-  (* Real definition (Week 3): semantic type for the affine Budget
-   * resource, with conservation invariant attached via na_inv.
-   * Modeled on cell.v's pattern.
-   *
-   * Stage 1: declared as Parameter so the file compiles. *)
   Parameter budget : Z -> type.
 
 End budget_placeholder.

@@ -325,36 +325,36 @@ Theorem reachable_implies_invariants :
 Proof.
   intros B0 s Hreach.
   induction Hreach as [| s a s' Hreach IH Hstep].
-  - (* init *)
+  -
     unfold Conservation, CapSoundness, initial. simpl. split; lia.
-  - (* step *)
+  -
     destruct IH as [Hcons Hcap].
     destruct a; simpl in Hstep.
-    + (* ASpendSuccess *)
+    +
       split.
       * eapply spend_success_preserves_conservation; eauto.
       * eapply spend_success_preserves_cap_soundness; eauto.
-    + (* ASpendInsufficient *)
+    +
       eapply spend_insufficient_preserves; eauto.
-    + (* ASpendFailPostCheck *)
+    +
       eapply spend_fail_post_check_preserves; eauto.
-    + (* AConsume *)
+    +
       split.
       * eapply consume_preserves_conservation; eauto.
       * eapply consume_preserves_cap_soundness; eauto.
-    + (* AReserve *)
+    +
       split.
       * eapply reserve_preserves_conservation; eauto.
       * eapply reserve_preserves_cap_soundness; eauto.
-    + (* AConfirmWithRefund *)
+    +
       split.
       * eapply confirm_preserves_conservation; eauto.
       * eapply confirm_preserves_cap_soundness; eauto.
-    + (* AForfeit *)
+    +
       split.
       * eapply forfeit_preserves_conservation; eauto.
       * eapply forfeit_preserves_cap_soundness; eauto.
-    + (* ARefundTo *)
+    +
       split.
       * eapply refund_to_preserves_conservation; eauto.
       * eapply refund_to_preserves_cap_soundness; eauto.
